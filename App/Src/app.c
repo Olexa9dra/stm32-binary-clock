@@ -7,7 +7,6 @@
 #include "display.h"
 #include "environment.h"
 #include "shift_register.h"
-#include <string.h>
 
 static DisplayMode selectedMode = DISPLAY_MODE_TIME;
 static UiState uiState = UI_STATE_NORMAL;
