@@ -59,8 +59,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define Audio_SCL_Pin GPIO_PIN_6
-#define Audio_SDA_Pin GPIO_PIN_9
 
 /* USER CODE BEGIN Private defines */
 
