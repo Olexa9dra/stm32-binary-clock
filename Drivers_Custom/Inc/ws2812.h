@@ -8,6 +8,7 @@
 
 void WS2812_Init(TIM_HandleTypeDef *htim);
 void WS2812_SetPixel(uint16_t index, uint8_t r, uint8_t g, uint8_t b);
+void WS2812_SetBrightness(uint8_t value);
 void WS2812_Clear(void);
 void WS2812_Show(void);
 

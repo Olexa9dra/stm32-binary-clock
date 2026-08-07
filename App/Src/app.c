@@ -6,6 +6,7 @@
 #include "delay_us.h"
 #include "display.h"
 #include "environment.h"
+#include "light_sensor.h"
 #include "ws2812.h"
 
 extern TIM_HandleTypeDef htim1;
@@ -15,6 +16,7 @@ static UiState uiState = UI_STATE_NORMAL;
 void App_Init(void) {
   DelayUs_Init();
   WS2812_Init(&htim1);
+  LightSensor_Init();
   BinaryClock_Init();
   Date_Init();
   Environment_Init();
@@ -24,6 +26,7 @@ void App_Init(void) {
 }
 
 void App_Run(void) {
+  LightSensor_Update();
   Buttons_Check();
   BinaryClock_Update();
   Date_Update();

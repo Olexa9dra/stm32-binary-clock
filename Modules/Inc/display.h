@@ -19,10 +19,10 @@ typedef enum {
 } DisplayColumn;
 
 #define COLOR_OFF 0, 0, 0
-#define COLOR_YELLOW 6, 6, 0
-#define COLOR_GREEN 0, 6, 0
-#define COLOR_RED 6, 0, 0
-#define COLOR_BLUE 0, 0, 6
+#define COLOR_YELLOW 255, 255, 0
+#define COLOR_GREEN 0, 255, 0
+#define COLOR_RED 255, 0, 0
+#define COLOR_BLUE 0, 0, 255
 
 void Display_Show(uint16_t value, DisplayMode mode);
 void Display_SetBlinkColumn(DisplayColumn column);

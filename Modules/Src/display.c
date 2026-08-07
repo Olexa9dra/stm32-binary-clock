@@ -1,4 +1,5 @@
 #include "display.h"
+#include "light_sensor.h"
 #include "ws2812.h"
 
 static DisplayColumn blinkColumn = DISPLAY_COLUMN_NONE;
@@ -24,6 +25,8 @@ void Display_Show(uint16_t value, DisplayMode mode) {
   if (!blinkVisible && blinkColumn != DISPLAY_COLUMN_NONE)
     value &= ~Display_GetBlinkMask();
 
+  LightSensor_Update();
+  WS2812_SetBrightness(LightSensor_GetBrightness());
   WS2812_Clear();
 
   for (uint8_t column = 0; column < 4; column++) {

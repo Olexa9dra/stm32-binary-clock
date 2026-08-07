@@ -9,15 +9,17 @@
 static TIM_HandleTypeDef *timer;
 
 static uint8_t ledData[WS2812_LED_COUNT][3];
-
 static uint16_t pwmData[WS2812_LED_COUNT * LED_BITS + RESET_SLOTS];
 
 static volatile uint8_t dmaFinished = 0;
+static uint8_t brightness = 255;
 
 void WS2812_Init(TIM_HandleTypeDef *htim) {
   timer = htim;
   WS2812_Clear();
 }
+
+void WS2812_SetBrightness(uint8_t value) { brightness = value; }
 
 void WS2812_SetPixel(uint16_t index, uint8_t r, uint8_t g, uint8_t b) {
   if (index >= WS2812_LED_COUNT)
@@ -41,7 +43,8 @@ void WS2812_Show(void) {
 
   for (int led = 0; led < WS2812_LED_COUNT; led++) {
     for (int color = 0; color < 3; color++) {
-      uint8_t value = ledData[led][color];
+
+      uint8_t value = ((uint16_t)ledData[led][color] * brightness) / 255;
 
       for (int bit = 7; bit >= 0; bit--) {
         if (value & (1 << bit))
