@@ -50,7 +50,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Drivers_Custom/Src/delay_us.c
     Drivers_Custom/Src/dht11.c
     Drivers_Custom/Src/rtc_ds3231.c
-    Drivers_Custom/Src/shift_register.c
+    Drivers_Custom/Src/ws2812.c
     Modules/Src/binary_clock.c
     Modules/Src/buttons.c
     Modules/Src/date.c

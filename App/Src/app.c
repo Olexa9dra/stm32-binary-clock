@@ -6,25 +6,21 @@
 #include "delay_us.h"
 #include "display.h"
 #include "environment.h"
-#include "shift_register.h"
+#include "ws2812.h"
 
+extern TIM_HandleTypeDef htim1;
 static DisplayMode selectedMode = DISPLAY_MODE_TIME;
 static UiState uiState = UI_STATE_NORMAL;
 
 void App_Init(void) {
   DelayUs_Init();
-  SHR_Init();
+  WS2812_Init(&htim1);
   BinaryClock_Init();
   Date_Init();
   Environment_Init();
   Buttons_Init();
-  Buzzer_Init();
+  // Buzzer_Init();
   HAL_Delay(1000);
-
-  // Buzzer_On();
-  // HAL_Delay(20);
-  // Buzzer_Off();
-  // HAL_Delay(1000);
 }
 
 void App_Run(void) {
@@ -36,18 +32,18 @@ void App_Run(void) {
   switch (selectedMode) {
   case DISPLAY_MODE_TIME:
     if (uiState == UI_STATE_NORMAL)
-      Display_Show(BinaryClock_GetDisplayValue());
+      Display_Show(BinaryClock_GetDisplayValue(), DISPLAY_MODE_TIME);
     else
-      Display_Show(BinaryClock_GetEditDisplayValue());
+      Display_Show(BinaryClock_GetEditDisplayValue(), DISPLAY_MODE_TIME);
     break;
   case DISPLAY_MODE_DATE:
     if (uiState == UI_STATE_NORMAL)
-      Display_Show(Date_GetDisplayValue());
+      Display_Show(Date_GetDisplayValue(), DISPLAY_MODE_DATE);
     else
-      Display_Show(Date_GetEditDisplayValue());
+      Display_Show(Date_GetEditDisplayValue(), DISPLAY_MODE_DATE);
     break;
   case DISPLAY_MODE_ENVIRONMENT:
-    Display_Show(Environment_GetDisplayValue());
+    Display_Show(Environment_GetDisplayValue(), DISPLAY_MODE_ENVIRONMENT);
     break;
   default:
     break;
