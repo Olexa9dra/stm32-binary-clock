@@ -2,7 +2,6 @@
 #define __APP_H
 
 #include "display.h"
-#include "stm32f4xx_hal.h"
 
 typedef enum {
   UI_STATE_NORMAL,

@@ -8,6 +8,8 @@
 #define BUTTON2_PIN GPIO_PIN_1
 #define BUTTON3_PIN GPIO_PIN_2
 #define BUTTON4_PIN GPIO_PIN_3
+#define BUTTON_COUNT 4U
+#define BUTTON_DEBOUNCE_MS 20U
 
 typedef struct {
   uint16_t pin;

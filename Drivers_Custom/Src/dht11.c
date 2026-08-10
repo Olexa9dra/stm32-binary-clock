@@ -1,50 +1,49 @@
 #include "dht11.h"
 #include "delay_us.h"
-#include "stm32f4xx_hal.h"
-#include "stm32f4xx_hal_gpio.h"
 
-static uint8_t dht_raw[5];
+static uint8_t dhtRaw[DHT_DATA_SIZE];
 
 static void DHT11_Start(void);
 static uint8_t DHT11_CheckResponse(void);
 static void DHT11_SetOutput(void);
 static void DHT11_SetInput(void);
-static uint8_t DHT11_WaitForPinState(GPIO_PinState state, uint32_t timeout_us);
+static uint8_t DHT11_WaitForPinState(GPIO_PinState state, uint32_t timeoutUs);
 static inline GPIO_PinState DHT11_ReadPin(void);
 static void DHT11_GPIO_Init(void);
 
-void DHT11_Init(void) { DHT11_GPIO_Init(); }
+void DHT11_Init(void) {
+  DelayUs_Init();
+  DHT11_GPIO_Init();
+}
 
 uint8_t DHT11_Read(DHT11_Data *data) {
-  for (uint8_t i = 0; i < 5; i++)
-    dht_raw[i] = 0;
+  for (uint8_t i = 0; i < DHT_DATA_SIZE; i++)
+    dhtRaw[i] = 0;
 
   DHT11_Start();
 
   if (!DHT11_CheckResponse())
     return 0;
 
-  for (uint8_t bit_index = 0; bit_index < 40; bit_index++) {
+  for (uint8_t bitIndex = 0; bitIndex < DHT_DATA_BITS; bitIndex++) {
     if (!DHT11_WaitForPinState(GPIO_PIN_SET, DHT_BIT_TIMEOUT_US))
       return 0;
 
-    uint32_t high_start = Micros();
-
+    uint32_t highStart = Micros();
     if (!DHT11_WaitForPinState(GPIO_PIN_RESET, DHT_BIT_TIMEOUT_US))
       return 0;
 
-    dht_raw[bit_index / 8] <<= 1;
-
-    if ((Micros() - high_start) > 50U)
-      dht_raw[bit_index / 8] |= 1U;
+    dhtRaw[bitIndex / 8] <<= 1;
+    if ((Micros() - highStart) > DHT_BIT_ONE_THRESHOLD_US)
+      dhtRaw[bitIndex / 8] |= 1U;
   }
 
-  if (dht_raw[4] !=
-      (uint8_t)(dht_raw[0] + dht_raw[1] + dht_raw[2] + dht_raw[3]))
+  uint8_t checksum = dhtRaw[0] + dhtRaw[1] + dhtRaw[2] + dhtRaw[3];
+  if (dhtRaw[DHT_CHECKSUM_INDEX] != checksum)
     return 0;
 
-  data->humidity = dht_raw[0];
-  data->temperature = dht_raw[2];
+  data->humidity = dhtRaw[0];
+  data->temperature = dhtRaw[2];
 
   return 1;
 }
@@ -60,13 +59,10 @@ static void DHT11_Start(void) {
 static uint8_t DHT11_CheckResponse(void) {
   if (!DHT11_WaitForPinState(GPIO_PIN_RESET, DHT_RESPONSE_TIMEOUT_US))
     return 0;
-
   if (!DHT11_WaitForPinState(GPIO_PIN_SET, DHT_RESPONSE_TIMEOUT_US))
     return 0;
-
   if (!DHT11_WaitForPinState(GPIO_PIN_RESET, DHT_RESPONSE_TIMEOUT_US))
     return 0;
-
   return 1;
 }
 
@@ -87,11 +83,11 @@ static void DHT11_SetInput(void) {
   HAL_GPIO_Init(DHT_PORT, &GPIO_InitStruct);
 }
 
-static uint8_t DHT11_WaitForPinState(GPIO_PinState state, uint32_t timeout_us) {
+static uint8_t DHT11_WaitForPinState(GPIO_PinState state, uint32_t timeoutUs) {
   uint32_t start = Micros();
 
   while (DHT11_ReadPin() != state) {
-    if ((Micros() - start) >= timeout_us)
+    if ((Micros() - start) >= timeoutUs)
       return 0;
   }
 

@@ -2,7 +2,15 @@
 #define __BINARY_CLOCK_H
 
 #include "display.h"
-#include "stm32f4xx_hal.h"
+#include "rtc_ds3231.h"
+
+#define CLOCK_UPDATE_DELAY_MS 250U
+#define HOURS_TENS_MIN 0U
+#define HOURS_TENS_MAX 2U
+#define HOURS_ONES_MAX 9U
+#define HOURS_ONES_MAX_20 3U
+#define MINUTES_TENS_MAX 5U
+#define MINUTES_ONES_MAX 9U
 
 typedef enum {
   EDIT_HOURS_TENS,
@@ -13,15 +21,14 @@ typedef enum {
 } EditField;
 
 void BinaryClock_Init(void);
+void BinaryClock_Update(void);
 uint16_t BinaryClock_GetDisplayValue(void);
 uint16_t BinaryClock_GetEditDisplayValue(void);
 DisplayColumn BinaryClock_GetSelectedColumn(void);
-
 void BinaryClock_BeginEdit(void);
 void BinaryClock_SelectNextField(void);
 void BinaryClock_IncrementSelected(void);
 void BinaryClock_DecrementSelected(void);
 void BinaryClock_SaveEdit(void);
-void BinaryClock_Update(void);
 
 #endif

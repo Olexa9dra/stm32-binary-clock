@@ -3,8 +3,16 @@
 
 #include "stm32f4xx_hal.h"
 
-#define DS3231_I2C hi2c1
 #define DS3231_ADDRESS (0x68 << 1)
+#define DS3231_REG_SECONDS 0x00
+#define DS3231_REG_MINUTES 0x01
+#define DS3231_REG_HOURS 0x02
+#define DS3231_REG_DAY 0x03
+#define DS3231_REG_DATE 0x04
+#define DS3231_REG_MONTH 0x05
+#define DS3231_REG_YEAR 0x06
+#define DS3231_I2C_TIMEOUT_MS HAL_MAX_DELAY
+#define DS3231_YEAR_OFFSET 2000U
 
 typedef struct {
   uint8_t second;
@@ -19,11 +27,8 @@ typedef struct {
   uint16_t year;
 } RTC_Date;
 
-void RTC3231_Init(void);
-
 HAL_StatusTypeDef RTC3231_GetTime(RTC_Time *time);
 HAL_StatusTypeDef RTC3231_SetTime(const RTC_Time *time);
-
 HAL_StatusTypeDef RTC3231_GetDate(RTC_Date *date);
 HAL_StatusTypeDef RTC3231_SetDate(const RTC_Date *date);
 

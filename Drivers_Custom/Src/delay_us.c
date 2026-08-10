@@ -10,10 +10,10 @@ void DelayUs_Init(void) {
   if (HAL_RCC_GetHCLKFreq() != timer_clk)
     timer_clk *= 2;
 
-  htim3.Instance = TIM3;
-  htim3.Init.Prescaler = timer_clk / 1000000 - 1;
+  htim3.Instance = DELAY_TIMER;
+  htim3.Init.Prescaler = timer_clk / DELAY_TIMER_PRESCALER_HZ - 1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 0xFFFF;
+  htim3.Init.Period = DELAY_TIMER_PERIOD;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 

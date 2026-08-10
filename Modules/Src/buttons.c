@@ -3,9 +3,8 @@
 #include "binary_clock.h"
 #include "date.h"
 #include "display.h"
-#include <stdint.h>
 
-static Button buttons[] = {
+static Button buttons[BUTTON_COUNT] = {
     {BUTTON1_PIN, GPIO_PIN_SET, 0},
     {BUTTON2_PIN, GPIO_PIN_SET, 0},
     {BUTTON3_PIN, GPIO_PIN_SET, 0},
@@ -18,27 +17,24 @@ static void Buttons_HandleNormalState(uint16_t button);
 static void Buttons_HandleEditTimeState(uint16_t button);
 static void Buttons_HandleEditDateState(uint16_t button);
 
-void Buttons_Init() { Buttons_GPIO_Init(); }
+void Buttons_Init(void) { Buttons_GPIO_Init(); }
 
 void Buttons_Check(void) {
-  for (uint8_t i = 0; i < 4; i++) {
+  uint32_t now = HAL_GetTick();
+
+  for (uint8_t i = 0; i < BUTTON_COUNT; i++) {
     GPIO_PinState state = HAL_GPIO_ReadPin(BUTTON_GPIO_PORT, buttons[i].pin);
-
-    if (buttons[i].prevState == GPIO_PIN_SET && state == GPIO_PIN_RESET) {
-      if (HAL_GetTick() - buttons[i].lastPressTime >= 20) {
-        buttons[i].lastPressTime = HAL_GetTick();
-        Buttons_Update(buttons[i].pin);
-      }
+    if (buttons[i].prevState == GPIO_PIN_SET && state == GPIO_PIN_RESET &&
+        now - buttons[i].lastPressTime >= BUTTON_DEBOUNCE_MS) {
+      buttons[i].lastPressTime = now;
+      Buttons_Update(buttons[i].pin);
     }
-
     buttons[i].prevState = state;
   }
 }
 
 static void Buttons_Update(uint16_t button) {
-  UiState uiState = App_GetUiState();
-
-  switch (uiState) {
+  switch (App_GetUiState()) {
   case UI_STATE_NORMAL:
     Buttons_HandleNormalState(button);
     break;
@@ -47,6 +43,8 @@ static void Buttons_Update(uint16_t button) {
     break;
   case UI_STATE_EDIT_DATE:
     Buttons_HandleEditDateState(button);
+    break;
+  default:
     break;
   }
 }
@@ -70,18 +68,20 @@ static void Buttons_HandleNormalState(uint16_t button) {
   case BUTTON4_PIN:
     switch (mode) {
     case DISPLAY_MODE_TIME:
-      App_SetUiState(UI_STATE_EDIT_TIME);
       BinaryClock_BeginEdit();
+      App_SetUiState(UI_STATE_EDIT_TIME);
       Display_SetBlinkColumn(BinaryClock_GetSelectedColumn());
       break;
     case DISPLAY_MODE_DATE:
-      App_SetUiState(UI_STATE_EDIT_DATE);
       Date_BeginEdit();
+      App_SetUiState(UI_STATE_EDIT_DATE);
       Display_SetBlinkColumn(Date_GetSelectedColumn());
       break;
     default:
       break;
     }
+    break;
+  default:
     break;
   }
 }
@@ -102,6 +102,8 @@ static void Buttons_HandleEditTimeState(uint16_t button) {
     BinaryClock_SaveEdit();
     Display_SetBlinkColumn(DISPLAY_COLUMN_NONE);
     App_SetUiState(UI_STATE_NORMAL);
+    break;
+  default:
     break;
   }
 }
@@ -125,6 +127,8 @@ static void Buttons_HandleEditDateState(uint16_t button) {
     } else {
       Display_SetBlinkColumn(Date_GetSelectedColumn());
     }
+    break;
+  default:
     break;
   }
 }

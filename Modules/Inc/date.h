@@ -3,7 +3,8 @@
 
 #include "display.h"
 #include "rtc_ds3231.h"
-#include "stm32f4xx_hal.h"
+
+#define DATE_UPDATE_DELAY_MS 250U
 
 typedef enum {
   EDIT_DAY_TENS,
@@ -31,12 +32,11 @@ uint16_t Date_GetEditDisplayValue(void);
 DisplayColumn Date_GetSelectedColumn(void);
 
 void Date_BeginEdit(void);
-
 void Date_IncrementSelected(void);
 void Date_DecrementSelected(void);
 void Date_SelectNextField(void);
 
-/* Returns 1 when editing is finished */
+/* Returns 1 when editing is finished. */
 uint8_t Date_SaveEdit(void);
 
 #endif

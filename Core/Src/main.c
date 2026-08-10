@@ -66,7 +66,6 @@ static void MX_GPIO_Init(void) {
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
 }
 
 static void MX_ADC1_Init(void) {
@@ -171,7 +170,3 @@ void Error_Handler(void) {
   while (1) {
   }
 }
-
-#ifdef USE_FULL_ASSERT
-void assert_failed(uint8_t *file, uint32_t line) {}
-#endif
