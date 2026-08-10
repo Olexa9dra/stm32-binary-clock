@@ -1,31 +1,16 @@
 #include "buzzer.h"
+#include "main.h"
 
-static void Buzzer_GPIO_Init(void);
+extern TIM_HandleTypeDef htim4;
 
 void Buzzer_Init(void) {
-  Buzzer_GPIO_Init();
+  if (HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2) != HAL_OK) {
+    Error_Handler();
+  }
+
   Buzzer_Off();
 }
 
-void Buzzer_On(void) {
-  HAL_GPIO_WritePin(BUZZER_PORT, BUZZER_PIN, GPIO_PIN_RESET);
-}
+void Buzzer_On(void) { __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 50); }
 
-void Buzzer_Off(void) {
-  HAL_GPIO_WritePin(BUZZER_PORT, BUZZER_PIN, GPIO_PIN_SET);
-}
-
-void Buzzer_Toggle(void) { HAL_GPIO_TogglePin(BUZZER_PORT, BUZZER_PIN); }
-
-static void Buzzer_GPIO_Init(void) {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-  HAL_GPIO_WritePin(BUZZER_PORT, BUZZER_PIN, GPIO_PIN_RESET);
-
-  GPIO_InitStruct.Pin = BUZZER_PIN;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-
-  HAL_GPIO_Init(BUZZER_PORT, &GPIO_InitStruct);
-}
+void Buzzer_Off(void) { __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 0); }

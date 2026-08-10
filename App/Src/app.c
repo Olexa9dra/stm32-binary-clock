@@ -15,7 +15,7 @@ void App_Init(void) {
   Environment_Init();
   Buttons_Init();
   Display_Init();
-  // Buzzer_Init();
+  Buzzer_Init();
 }
 
 void App_Run(void) {
