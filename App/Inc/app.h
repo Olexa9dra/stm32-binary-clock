@@ -7,6 +7,7 @@ typedef enum {
   UI_STATE_NORMAL,
   UI_STATE_EDIT_TIME,
   UI_STATE_EDIT_DATE,
+  UI_STATE_EDIT_ALARM,
 } UiState;
 
 void App_Init(void);

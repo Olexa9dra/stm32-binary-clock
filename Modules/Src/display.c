@@ -77,6 +77,9 @@ static void Display_SetLedColor(DisplayMode mode, uint8_t column, uint8_t led) {
     else
       WS2812_SetPixel(led, COLOR_RED);
     break;
+  case DISPLAY_MODE_ALARM:
+    WS2812_SetPixel(led, COLOR_PURPLE);
+    break;
   default:
     WS2812_SetPixel(led, COLOR_YELLOW);
     break;

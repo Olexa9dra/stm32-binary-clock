@@ -1,4 +1,5 @@
 #include "app.h"
+#include "alarm.h"
 #include "binary_clock.h"
 #include "buttons.h"
 #include "buzzer.h"
@@ -23,6 +24,7 @@ void App_Run(void) {
   BinaryClock_Update();
   Date_Update();
   Environment_Update();
+  Alarm_Update();
 
   uint16_t value;
 
@@ -37,6 +39,10 @@ void App_Run(void) {
     break;
   case DISPLAY_MODE_ENVIRONMENT:
     value = Environment_GetDisplayValue();
+    break;
+  case DISPLAY_MODE_ALARM:
+    value = (uiState == UI_STATE_NORMAL) ? Alarm_GetDisplayValue()
+                                         : Alarm_GetEditDisplayValue();
     break;
   default:
     return;

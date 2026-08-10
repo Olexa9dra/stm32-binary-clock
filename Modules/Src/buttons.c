@@ -1,4 +1,5 @@
 #include "buttons.h"
+#include "alarm.h"
 #include "app.h"
 #include "binary_clock.h"
 #include "date.h"
@@ -16,6 +17,7 @@ static void Buttons_GPIO_Init(void);
 static void Buttons_HandleNormalState(uint16_t button);
 static void Buttons_HandleEditTimeState(uint16_t button);
 static void Buttons_HandleEditDateState(uint16_t button);
+static void Buttons_HandleEditAlarmState(uint16_t button);
 
 void Buttons_Init(void) { Buttons_GPIO_Init(); }
 
@@ -44,6 +46,9 @@ static void Buttons_Update(uint16_t button) {
   case UI_STATE_EDIT_DATE:
     Buttons_HandleEditDateState(button);
     break;
+  case UI_STATE_EDIT_ALARM:
+    Buttons_HandleEditAlarmState(button);
+    break;
   default:
     break;
   }
@@ -60,7 +65,12 @@ static void Buttons_HandleNormalState(uint16_t button) {
     App_SetDisplayMode(mode);
     break;
   case BUTTON2_PIN:
-    // TODO
+    if (mode == DISPLAY_MODE_TIME)
+      mode = DISPLAY_MODE_COUNT - 1;
+    else
+      mode--;
+
+    App_SetDisplayMode(mode);
     break;
   case BUTTON3_PIN:
     // TODO
@@ -76,6 +86,11 @@ static void Buttons_HandleNormalState(uint16_t button) {
       Date_BeginEdit();
       App_SetUiState(UI_STATE_EDIT_DATE);
       Display_SetBlinkColumn(Date_GetSelectedColumn());
+      break;
+    case DISPLAY_MODE_ALARM:
+      Alarm_BeginEdit();
+      App_SetUiState(UI_STATE_EDIT_ALARM);
+      Display_SetBlinkColumn(Alarm_GetSelectedColumn());
       break;
     default:
       break;
@@ -127,6 +142,28 @@ static void Buttons_HandleEditDateState(uint16_t button) {
     } else {
       Display_SetBlinkColumn(Date_GetSelectedColumn());
     }
+    break;
+  default:
+    break;
+  }
+}
+
+static void Buttons_HandleEditAlarmState(uint16_t button) {
+  switch (button) {
+  case BUTTON1_PIN:
+    Alarm_IncrementSelected();
+    break;
+  case BUTTON2_PIN:
+    Alarm_DecrementSelected();
+    break;
+  case BUTTON3_PIN:
+    Alarm_SelectNextField();
+    Display_SetBlinkColumn(Alarm_GetSelectedColumn());
+    break;
+  case BUTTON4_PIN:
+    Alarm_SaveEdit();
+    Display_SetBlinkColumn(DISPLAY_COLUMN_NONE);
+    App_SetUiState(UI_STATE_NORMAL);
     break;
   default:
     break;

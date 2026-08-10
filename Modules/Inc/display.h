@@ -11,6 +11,7 @@
 #define COLOR_GREEN 0, 255, 0
 #define COLOR_RED 255, 0, 0
 #define COLOR_BLUE 0, 0, 255
+#define COLOR_PURPLE 255, 0, 255
 
 static const uint8_t LED_MASK_0[DISPLAY_ROW_COUNT][DISPLAY_COLUMN_COUNT] = {
     {12, 11, 4, 3},
@@ -44,6 +45,7 @@ typedef enum {
   DISPLAY_MODE_TIME,
   DISPLAY_MODE_DATE,
   DISPLAY_MODE_ENVIRONMENT,
+  DISPLAY_MODE_ALARM,
   DISPLAY_MODE_COUNT,
 } DisplayMode;
 
