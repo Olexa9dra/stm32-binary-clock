@@ -5,7 +5,6 @@
 #include "rtc_ds3231.h"
 
 #define ALARM_UPDATE_DELAY_MS 250U
-
 #define ALARM_HOURS_MAX 24U
 #define ALARM_HOURS_ONES_MAX 9U
 #define ALARM_HOURS_ONES_MAX_20 9U

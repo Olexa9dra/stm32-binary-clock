@@ -18,23 +18,18 @@ void LightSensor_Update(void) {
     return;
 
   lastUpdate = now;
-
   uint32_t sum = 0;
 
   for (uint8_t i = 0; i < ADC_SAMPLES; i++) {
     HAL_ADC_Start(&hadc1);
-
     if (HAL_ADC_PollForConversion(&hadc1, 10) == HAL_OK)
       sum += HAL_ADC_GetValue(&hadc1);
-
     HAL_ADC_Stop(&hadc1);
   }
 
   uint16_t newValue = sum / ADC_SAMPLES;
-
   // Smooth ADC reading.
   rawValue = (rawValue * 3 + newValue) / 4;
-
   uint8_t target = LightSensor_MapBrightness(rawValue);
   int16_t diff = (int16_t)target - (int16_t)brightness;
 
@@ -52,7 +47,6 @@ static uint8_t LightSensor_MapBrightness(uint16_t value) {
     value = ADC_MIN;
   if (value > ADC_MAX)
     value = ADC_MAX;
-
   return BRIGHTNESS_MAX -
          ((uint32_t)(value - ADC_MIN) * (BRIGHTNESS_MAX - BRIGHTNESS_MIN)) /
              (ADC_MAX - ADC_MIN);

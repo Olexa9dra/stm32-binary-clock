@@ -14,7 +14,6 @@ void App_Init(void) {
   BinaryClock_Init();
   Date_Init();
   Environment_Init();
-  Buttons_Init();
   Display_Init();
   Buzzer_Init();
 }

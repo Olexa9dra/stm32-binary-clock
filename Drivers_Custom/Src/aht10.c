@@ -9,9 +9,7 @@ static HAL_StatusTypeDef AHT10_SendCommand(uint8_t *command, uint16_t size) {
 
 HAL_StatusTypeDef AHT10_Init(void) {
   uint8_t command = AHT10_CMD_SOFT_RESET;
-
   HAL_StatusTypeDef status = AHT10_SendCommand(&command, 1);
-
   if (status != HAL_OK)
     return status;
 
@@ -19,7 +17,6 @@ HAL_StatusTypeDef AHT10_Init(void) {
 
   uint8_t initCommand[] = {AHT10_CMD_INITIALIZE, AHT10_INIT_ARG_1,
                            AHT10_INIT_ARG_2};
-
   status = AHT10_SendCommand(initCommand, 3);
 
   HAL_Delay(AHT10_INIT_DELAY_MS);
@@ -33,19 +30,15 @@ HAL_StatusTypeDef AHT10_Read(AHT10_Data *data) {
 
   uint8_t command[] = {AHT10_CMD_MEASURE, AHT10_MEASURE_ARG_1,
                        AHT10_MEASURE_ARG_2};
-
   HAL_StatusTypeDef status = AHT10_SendCommand(command, 3);
-
   if (status != HAL_OK)
     return status;
 
   HAL_Delay(AHT10_MEASURE_DELAY_MS);
 
   uint8_t buffer[6];
-
   status =
       HAL_I2C_Master_Receive(&hi2c1, AHT10_ADDRESS, buffer, 6, HAL_MAX_DELAY);
-
   if (status != HAL_OK)
     return status;
   // Sensor is still busy.

@@ -13,13 +13,10 @@ static Button buttons[BUTTON_COUNT] = {
 };
 
 static void Buttons_Update(uint16_t button);
-static void Buttons_GPIO_Init(void);
 static void Buttons_HandleNormalState(uint16_t button);
 static void Buttons_HandleEditTimeState(uint16_t button);
 static void Buttons_HandleEditDateState(uint16_t button);
 static void Buttons_HandleEditAlarmState(uint16_t button);
-
-void Buttons_Init(void) { Buttons_GPIO_Init(); }
 
 void Buttons_Check(void) {
   uint32_t now = HAL_GetTick();
@@ -168,12 +165,4 @@ static void Buttons_HandleEditAlarmState(uint16_t button) {
   default:
     break;
   }
-}
-
-static void Buttons_GPIO_Init(void) {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  GPIO_InitStruct.Pin = BUTTON1_PIN | BUTTON2_PIN | BUTTON3_PIN | BUTTON4_PIN;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(BUTTON_GPIO_PORT, &GPIO_InitStruct);
 }

@@ -1,10 +1,10 @@
 #include "buzzer.h"
 #include "main.h"
 
-extern TIM_HandleTypeDef htim4;
+extern TIM_HandleTypeDef htim2;
 
 void Buzzer_Init(void) {
-  if (HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2) != HAL_OK) {
+  if (HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1) != HAL_OK) {
     Error_Handler();
   }
 
@@ -26,9 +26,9 @@ void Buzzer_PlayNote(BuzzerNote note) {
   if (note >= BUZZER_NOTE_C4 && note <= BUZZER_NOTE_C5) {
     uint16_t period = periods[note];
 
-    __HAL_TIM_SET_AUTORELOAD(&htim4, period);
-    __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, period / 2);
-    __HAL_TIM_SET_COUNTER(&htim4, 0);
+    __HAL_TIM_SET_AUTORELOAD(&htim2, period);
+    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, period / 2);
+    __HAL_TIM_SET_COUNTER(&htim2, 0);
   }
 }
 
@@ -66,4 +66,4 @@ void Buzzer_PlayMelody(void) {
 
 void Buzzer_On(void) { Buzzer_PlayNote(BUZZER_NOTE_A4); }
 
-void Buzzer_Off(void) { __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, 0); }
+void Buzzer_Off(void) { __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 0); }
