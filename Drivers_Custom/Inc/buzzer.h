@@ -1,7 +1,7 @@
 #ifndef __BUZZER_H
 #define __BUZZER_H
 
-#include "stm32f4xx_hal.h"
+#include "stm32f1xx_hal.h"
 
 typedef enum {
   BUZZER_NOTE_C4,

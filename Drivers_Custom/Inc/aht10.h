@@ -1,7 +1,7 @@
 #ifndef __AHT10_H
 #define __AHT10_H
 
-#include "stm32f4xx_hal.h"
+#include "stm32f1xx_hal.h"
 #include <stdint.h>
 
 #define AHT10_ADDRESS (0x38 << 1)

@@ -1,7 +1,7 @@
 #ifndef __BUTTONS_H
 #define __BUTTONS_H
 
-#include "stm32f4xx_hal.h"
+#include "stm32f1xx_hal.h"
 
 #define BUTTON_GPIO_PORT GPIOA
 #define BUTTON1_PIN GPIO_PIN_1

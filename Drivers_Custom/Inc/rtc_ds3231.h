@@ -1,7 +1,7 @@
 #ifndef __RTC_DS3231_H
 #define __RTC_DS3231_H
 
-#include "stm32f4xx_hal.h"
+#include "stm32f1xx_hal.h"
 
 #define DS3231_ADDRESS (0x68 << 1)
 #define DS3231_REG_SECONDS 0x00
