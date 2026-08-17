@@ -1,12 +1,12 @@
 #include "environment.h"
-#include "aht10.h"
+#include "th_sensor.h"
 
-static AHT10_Data data = {0};
+static TH_SENSOR_Data data = {0};
 static uint32_t lastUpdate = 0;
 
 void Environment_Init(void) {
-  AHT10_Init();
-  AHT10_Read(&data);
+  TH_Sensor_Init();
+  TH_Sensor_Read(&data);
   lastUpdate = HAL_GetTick();
 }
 
@@ -14,7 +14,7 @@ void Environment_Update(void) {
   if (HAL_GetTick() - lastUpdate < ENVIRONMENT_UPDATE_INTERVAL_MS)
     return;
   lastUpdate = HAL_GetTick();
-  AHT10_Read(&data);
+  TH_Sensor_Read(&data);
 }
 
 uint16_t Environment_GetDisplayValue(void) {

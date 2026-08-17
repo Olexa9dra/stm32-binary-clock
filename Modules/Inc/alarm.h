@@ -2,7 +2,7 @@
 #define __ALARM_H
 
 #include "display.h"
-#include "rtc_ds3231.h"
+#include "rtc.h"
 
 #define ALARM_UPDATE_DELAY_MS 250U
 #define ALARM_HOURS_MAX 24U

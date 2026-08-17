@@ -7,7 +7,7 @@ static uint32_t lastUpdate = 0;
 
 static uint16_t BinaryClock_GetTimeValue(uint8_t hour, uint8_t minute);
 
-void BinaryClock_Init(void) { RTC3231_GetTime(&clock); }
+void BinaryClock_Init(void) { RTC_GetTime(&clock); }
 
 void BinaryClock_Update(void) {
   uint32_t now = HAL_GetTick();
@@ -16,7 +16,7 @@ void BinaryClock_Update(void) {
 
   lastUpdate = now;
 
-  RTC3231_GetTime(&clock);
+  RTC_GetTime(&clock);
 }
 
 uint16_t BinaryClock_GetDisplayValue(void) {
@@ -37,7 +37,7 @@ static uint16_t BinaryClock_GetTimeValue(uint8_t hour, uint8_t minute) {
 }
 
 void BinaryClock_BeginEdit(void) {
-  RTC3231_GetTime(&editClock);
+  RTC_GetTime(&editClock);
   editField = EDIT_HOURS_TENS;
 }
 
@@ -128,7 +128,7 @@ void BinaryClock_DecrementSelected(void) {
 
 void BinaryClock_SaveEdit(void) {
   editClock.second = 0;
-  if (RTC3231_SetTime(&editClock) == HAL_OK)
+  if (RTC_SetTime(&editClock) == HAL_OK)
     clock = editClock;
 }
 

@@ -2,7 +2,7 @@
 #define __DATE_H
 
 #include "display.h"
-#include "rtc_ds3231.h"
+#include "rtc.h"
 
 #define DATE_UPDATE_DELAY_MS 250U
 

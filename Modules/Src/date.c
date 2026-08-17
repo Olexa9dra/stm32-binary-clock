@@ -13,7 +13,7 @@ static uint8_t IsLeapYear(uint16_t year);
 static uint8_t DaysInMonth(uint8_t month, uint16_t year);
 static void ClampDate(RTC_Date *date);
 
-void Date_Init(void) { RTC3231_GetDate(&date); }
+void Date_Init(void) { RTC_GetDate(&date); }
 
 void Date_Update(void) {
   uint32_t now = HAL_GetTick();
@@ -21,7 +21,7 @@ void Date_Update(void) {
     return;
 
   lastUpdate = now;
-  RTC3231_GetDate(&date);
+  RTC_GetDate(&date);
 }
 
 uint16_t Date_GetDisplayValue(void) {
@@ -35,7 +35,7 @@ uint16_t Date_GetEditDisplayValue(void) {
 }
 
 void Date_BeginEdit(void) {
-  RTC3231_GetDate(&editDate);
+  RTC_GetDate(&editDate);
 
   editStage = DATE_EDIT_DAY_MONTH;
   dateField = EDIT_DAY_TENS;
@@ -276,9 +276,9 @@ uint8_t Date_SaveEdit(void) {
   }
 
   ClampDate(&editDate);
-  if (RTC3231_SetDate(&editDate) != HAL_OK)
+  if (RTC_SetDate(&editDate) != HAL_OK)
     return 0;
-  RTC3231_GetDate(&date);
+  RTC_GetDate(&date);
 
   return 1;
 }

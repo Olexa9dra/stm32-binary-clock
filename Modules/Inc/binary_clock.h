@@ -2,7 +2,7 @@
 #define __BINARY_CLOCK_H
 
 #include "display.h"
-#include "rtc_ds3231.h"
+#include "rtc.h"
 
 #define CLOCK_UPDATE_DELAY_MS 250U
 #define HOURS_TENS_MIN 0U

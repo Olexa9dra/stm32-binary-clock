@@ -1,7 +1,7 @@
 #include "display.h"
+#include "accelerometer.h"
+#include "led.h"
 #include "light_sensor.h"
-#include "mma8452q.h"
-#include "ws2812.h"
 
 static DisplayColumn blinkColumn = DISPLAY_COLUMN_NONE;
 static uint8_t blinkVisible = 1;
@@ -13,8 +13,8 @@ static const uint8_t (
     *Display_GetLedMask(DisplayRotation rotation))[DISPLAY_COLUMN_COUNT];
 
 void Display_Init(void) {
-  WS2812_Init();
-  MMA8452Q_Init();
+  LED_Init();
+  Accelerometer_Init();
   LightSensor_Init();
 }
 
@@ -27,11 +27,11 @@ void Display_Show(uint16_t value, DisplayMode mode) {
     value &= ~Display_GetBlinkMask();
 
   LightSensor_Update();
-  WS2812_SetBrightness(LightSensor_GetBrightness());
-  WS2812_Clear();
+  LED_SetBrightness(LightSensor_GetBrightness());
+  LED_Clear();
 
   const uint8_t (*mask)[DISPLAY_COLUMN_COUNT] =
-      Display_GetLedMask(MMA8452Q_GetRotation());
+      Display_GetLedMask(Accelerometer_GetRotation());
 
   for (uint8_t column = 0; column < DISPLAY_COLUMN_COUNT; column++) {
     uint8_t nibble = (value >> (column * 4)) & 0x0F;
@@ -43,7 +43,7 @@ void Display_Show(uint16_t value, DisplayMode mode) {
     }
   }
 
-  WS2812_Show();
+  LED_Show();
 }
 
 void Display_SetBlinkColumn(DisplayColumn column) { blinkColumn = column; }
@@ -66,22 +66,22 @@ static uint16_t Display_GetBlinkMask(void) {
 static void Display_SetLedColor(DisplayMode mode, uint8_t column, uint8_t led) {
   switch (mode) {
   case DISPLAY_MODE_TIME:
-    WS2812_SetPixel(led, COLOR_YELLOW);
+    LED_SetPixel(led, COLOR_YELLOW);
     break;
   case DISPLAY_MODE_DATE:
-    WS2812_SetPixel(led, COLOR_GREEN);
+    LED_SetPixel(led, COLOR_GREEN);
     break;
   case DISPLAY_MODE_ENVIRONMENT:
     if (column < 2)
-      WS2812_SetPixel(led, COLOR_BLUE);
+      LED_SetPixel(led, COLOR_BLUE);
     else
-      WS2812_SetPixel(led, COLOR_RED);
+      LED_SetPixel(led, COLOR_RED);
     break;
   case DISPLAY_MODE_ALARM:
-    WS2812_SetPixel(led, COLOR_PURPLE);
+    LED_SetPixel(led, COLOR_PURPLE);
     break;
   default:
-    WS2812_SetPixel(led, COLOR_YELLOW);
+    LED_SetPixel(led, COLOR_YELLOW);
     break;
   }
 }

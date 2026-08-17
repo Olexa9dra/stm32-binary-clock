@@ -21,7 +21,7 @@ void Alarm_Update(void) {
 
   lastUpdate = now;
   RTC_Time currentTime;
-  if (RTC3231_GetTime(&currentTime) != HAL_OK)
+  if (RTC_GetTime(&currentTime) != HAL_OK)
     return;
 
   uint32_t currentMinute =
