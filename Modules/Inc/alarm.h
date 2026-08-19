@@ -30,5 +30,6 @@ void Alarm_DecrementSelected(void);
 void Alarm_SaveEdit(void);
 uint8_t Alarm_IsEnabled(void);
 void Alarm_Disable(void);
+uint8_t Alarm_IsRinging(void);
 
 #endif

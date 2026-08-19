@@ -1,4 +1,5 @@
 #include "buttons.h"
+#include "accelerometer.h"
 #include "alarm.h"
 #include "app.h"
 #include "binary_clock.h"
@@ -17,6 +18,7 @@ static void Buttons_HandleNormalState(uint16_t button);
 static void Buttons_HandleEditTimeState(uint16_t button);
 static void Buttons_HandleEditDateState(uint16_t button);
 static void Buttons_HandleEditAlarmState(uint16_t button);
+static uint16_t Buttons_GetLogicalPin(uint16_t physicalPin);
 
 void Buttons_Check(void) {
   uint32_t now = HAL_GetTick();
@@ -26,7 +28,13 @@ void Buttons_Check(void) {
     if (buttons[i].prevState == GPIO_PIN_SET && state == GPIO_PIN_RESET &&
         now - buttons[i].lastPressTime >= BUTTON_DEBOUNCE_MS) {
       buttons[i].lastPressTime = now;
-      Buttons_Update(buttons[i].pin);
+
+      if (Alarm_IsRinging()) {
+        Alarm_Disable();
+        continue;
+      }
+
+      Buttons_Update(Buttons_GetLogicalPin(buttons[i].pin));
     }
     buttons[i].prevState = state;
   }
@@ -164,5 +172,60 @@ static void Buttons_HandleEditAlarmState(uint16_t button) {
     break;
   default:
     break;
+  }
+}
+
+static uint16_t Buttons_GetLogicalPin(uint16_t physicalPin) {
+  uint8_t physicalIndex;
+
+  switch (physicalPin) {
+  case BUTTON1_PIN:
+    physicalIndex = 0;
+    break;
+  case BUTTON2_PIN:
+    physicalIndex = 1;
+    break;
+  case BUTTON3_PIN:
+    physicalIndex = 2;
+    break;
+  case BUTTON4_PIN:
+    physicalIndex = 3;
+    break;
+  default:
+    return physicalPin;
+  }
+
+  const uint8_t *mask;
+
+  switch (Accelerometer_GetRotation()) {
+  case DISPLAY_ROTATION_0:
+    mask = BUTTON_MASK_0;
+    break;
+
+  case DISPLAY_ROTATION_90:
+    mask = BUTTON_MASK_90;
+    break;
+
+  case DISPLAY_ROTATION_180:
+    mask = BUTTON_MASK_180;
+    break;
+
+  case DISPLAY_ROTATION_270:
+  default:
+    mask = BUTTON_MASK_270;
+    break;
+  }
+
+  switch (mask[physicalIndex]) {
+  case 0:
+    return BUTTON1_PIN;
+  case 1:
+    return BUTTON2_PIN;
+  case 2:
+    return BUTTON3_PIN;
+  case 3:
+    return BUTTON4_PIN;
+  default:
+    return physicalPin;
   }
 }

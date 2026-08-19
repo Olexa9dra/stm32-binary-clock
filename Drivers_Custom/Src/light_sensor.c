@@ -47,7 +47,7 @@ static uint8_t LightSensor_MapBrightness(uint16_t value) {
     value = ADC_MIN;
   if (value > ADC_MAX)
     value = ADC_MAX;
-  return BRIGHTNESS_MAX -
+  return BRIGHTNESS_MIN +
          ((uint32_t)(value - ADC_MIN) * (BRIGHTNESS_MAX - BRIGHTNESS_MIN)) /
              (ADC_MAX - ADC_MIN);
 }
