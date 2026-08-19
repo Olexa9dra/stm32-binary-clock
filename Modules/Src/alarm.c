@@ -228,8 +228,6 @@ void Alarm_SaveEdit(void) {
   lastTriggeredMinute = UINT32_MAX;
 }
 
-uint8_t Alarm_IsEnabled(void) { return alarmEnabled; }
-
 void Alarm_Disable(void) { Alarm_Clear(); }
 
 static void Alarm_Clear(void) {

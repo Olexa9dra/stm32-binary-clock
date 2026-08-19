@@ -26,17 +26,13 @@ typedef enum { DATE_EDIT_DAY_MONTH, DATE_EDIT_YEAR } DateEditStage;
 
 void Date_Init(void);
 void Date_Update(void);
-
 uint16_t Date_GetDisplayValue(void);
 uint16_t Date_GetEditDisplayValue(void);
 DisplayColumn Date_GetSelectedColumn(void);
-
 void Date_BeginEdit(void);
 void Date_IncrementSelected(void);
 void Date_DecrementSelected(void);
 void Date_SelectNextField(void);
-
-/* Returns 1 when editing is finished. */
 uint8_t Date_SaveEdit(void);
 
 #endif

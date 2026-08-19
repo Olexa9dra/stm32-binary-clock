@@ -12,22 +12,18 @@ static void PowerManager_TurnOnModules(void);
 void PowerManager_Init(void) {
   state = POWER_STATE_ACTIVE;
   lastActivityTick = HAL_GetTick();
-  Accelerometer_Init();
   Accelerometer_EnableTapDetection();
 }
 
 void PowerManager_Update(void) {
   uint32_t now = HAL_GetTick();
 
-  // Check tap even while sleeping.
   if (Accelerometer_TapDetected()) {
-    PowerManager_Wake();
+    PowerManager_ResetIdleTimer();
     return;
   }
-
   if (state == POWER_STATE_SLEEPING)
     return;
-
   if ((now - lastActivityTick) >= POWER_MANAGER_IDLE_TIMEOUT_MS) {
     PowerManager_Sleep();
   }
@@ -68,11 +64,7 @@ uint8_t PowerManager_IsSleeping(void) { return state == POWER_STATE_SLEEPING; }
 
 static void PowerManager_TurnOffModules(void) {
   /*
-   * RTC intentionally stays running.
-   *
-   * For now only turn off the LEDs.
-   * Other modules can be added here once their
-   * Sleep/Stop APIs are defined.
+   * RTC intentionally keeps running.
    */
 
   LED_Clear();
@@ -81,8 +73,6 @@ static void PowerManager_TurnOffModules(void) {
 
 static void PowerManager_TurnOnModules(void) {
   /*
-   * Other modules can be re-enabled here later.
-   *
-   * The display will be redrawn by App_Run().
+   * Display will be redrawn by App_Run().
    */
 }

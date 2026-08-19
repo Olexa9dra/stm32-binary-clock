@@ -56,8 +56,8 @@ void BinaryClock_IncrementSelected(void) {
     tens = editClock.hour / 10;
     ones = editClock.hour % 10;
     tens = (tens + 1) % 3;
-    if (tens == 2 && ones > HOURS_ONES_MAX_20)
-      ones = HOURS_ONES_MAX_20;
+    if (tens == 2 && ones > 3)
+      ones = 3;
     editClock.hour = tens * 10 + ones;
     break;
 
@@ -96,8 +96,8 @@ void BinaryClock_DecrementSelected(void) {
     tens = editClock.hour / 10;
     ones = editClock.hour % 10;
     tens = (tens == 0) ? 2 : tens - 1;
-    if (tens == 2 && ones > HOURS_ONES_MAX_20)
-      ones = HOURS_ONES_MAX_20;
+    if (tens == 2 && ones > 3)
+      ones = 3;
     editClock.hour = tens * 10 + ones;
     break;
   case EDIT_HOURS_ONES:

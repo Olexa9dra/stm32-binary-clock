@@ -5,12 +5,7 @@
 
 #define RTC_ADDRESS (0x68 << 1)
 #define RTC_REG_SECONDS 0x00
-#define RTC_REG_MINUTES 0x01
-#define RTC_REG_HOURS 0x02
 #define RTC_REG_DAY 0x03
-#define RTC_REG_DATE 0x04
-#define RTC_REG_MONTH 0x05
-#define RTC_REG_YEAR 0x06
 #define RTC_I2C_TIMEOUT_MS HAL_MAX_DELAY
 #define RTC_YEAR_OFFSET 2000U
 

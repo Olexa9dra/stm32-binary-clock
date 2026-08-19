@@ -14,7 +14,6 @@ static const uint8_t (
 
 void Display_Init(void) {
   LED_Init();
-  Accelerometer_Init();
   LightSensor_Init();
 }
 

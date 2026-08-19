@@ -1,12 +1,14 @@
-#ifndef POWER_MANAGER_H
-#define POWER_MANAGER_H
+#ifndef __POWER_MANAGER_H
+#define __POWER_MANAGER_H
 
-#include "main.h"
-#include <stdint.h>
+#include "stm32f1xx_hal.h"
 
-#define POWER_MANAGER_IDLE_TIMEOUT_MS 60000U
+typedef enum {
+  POWER_STATE_ACTIVE,
+  POWER_STATE_SLEEPING,
+} PowerState;
 
-typedef enum { POWER_STATE_ACTIVE = 0, POWER_STATE_SLEEPING } PowerState;
+#define POWER_MANAGER_IDLE_TIMEOUT_MS 30000U
 
 void PowerManager_Init(void);
 void PowerManager_Update(void);

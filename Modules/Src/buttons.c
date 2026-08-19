@@ -5,6 +5,7 @@
 #include "binary_clock.h"
 #include "date.h"
 #include "display.h"
+#include "power_manager.h"
 
 static Button buttons[BUTTON_COUNT] = {
     {BUTTON1_PIN, GPIO_PIN_SET, 0},
@@ -25,17 +26,26 @@ void Buttons_Check(void) {
 
   for (uint8_t i = 0; i < BUTTON_COUNT; i++) {
     GPIO_PinState state = HAL_GPIO_ReadPin(BUTTON_GPIO_PORT, buttons[i].pin);
+
     if (buttons[i].prevState == GPIO_PIN_SET && state == GPIO_PIN_RESET &&
         now - buttons[i].lastPressTime >= BUTTON_DEBOUNCE_MS) {
       buttons[i].lastPressTime = now;
 
       if (Alarm_IsRinging()) {
         Alarm_Disable();
+        PowerManager_ResetIdleTimer();
         continue;
       }
 
+      if (PowerManager_IsSleeping()) {
+        PowerManager_Wake();
+        continue;
+      }
+
+      PowerManager_ResetIdleTimer();
       Buttons_Update(Buttons_GetLogicalPin(buttons[i].pin));
     }
+
     buttons[i].prevState = state;
   }
 }

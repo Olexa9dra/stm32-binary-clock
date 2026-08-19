@@ -5,11 +5,6 @@
 #include "rtc.h"
 
 #define ALARM_UPDATE_DELAY_MS 250U
-#define ALARM_HOURS_MAX 24U
-#define ALARM_HOURS_ONES_MAX 9U
-#define ALARM_HOURS_ONES_MAX_20 9U
-#define ALARM_MINUTES_TENS_MAX 5U
-#define ALARM_MINUTES_ONES_MAX 9U
 
 typedef enum {
   ALARM_EDIT_HOURS_TENS,
@@ -28,7 +23,6 @@ void Alarm_SelectNextField(void);
 void Alarm_IncrementSelected(void);
 void Alarm_DecrementSelected(void);
 void Alarm_SaveEdit(void);
-uint8_t Alarm_IsEnabled(void);
 void Alarm_Disable(void);
 uint8_t Alarm_IsRinging(void);
 

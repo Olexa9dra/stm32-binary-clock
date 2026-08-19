@@ -5,12 +5,6 @@
 #include "rtc.h"
 
 #define CLOCK_UPDATE_DELAY_MS 250U
-#define HOURS_TENS_MIN 0U
-#define HOURS_TENS_MAX 2U
-#define HOURS_ONES_MAX 9U
-#define HOURS_ONES_MAX_20 3U
-#define MINUTES_TENS_MAX 5U
-#define MINUTES_ONES_MAX 9U
 
 typedef enum {
   EDIT_HOURS_TENS,

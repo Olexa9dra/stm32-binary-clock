@@ -12,10 +12,8 @@ typedef enum {
 
 void App_Init(void);
 void App_Run(void);
-
 DisplayMode App_GetDisplayMode(void);
 void App_SetDisplayMode(DisplayMode mode);
-
 UiState App_GetUiState(void);
 void App_SetUiState(UiState state);
 
