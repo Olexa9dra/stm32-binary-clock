@@ -19,28 +19,28 @@
 #define DISPLAY_COLUMN_4 (1U << 3)
 
 static const uint8_t LED_MASK_0[DISPLAY_ROW_COUNT][DISPLAY_COLUMN_COUNT] = {
-    {12, 11, 4, 3},
-    {13, 10, 5, 2},
-    {14, 9, 6, 1},
-    {15, 8, 7, 0},
+    {3, 2, 1, 0},
+    {4, 5, 6, 7},
+    {11, 10, 9, 8},
+    {12, 13, 14, 15},
 };
 static const uint8_t LED_MASK_90[DISPLAY_ROW_COUNT][DISPLAY_COLUMN_COUNT] = {
-    {15, 14, 13, 12},
-    {8, 9, 10, 11},
-    {7, 6, 5, 4},
-    {0, 1, 2, 3},
-};
-static const uint8_t LED_MASK_180[DISPLAY_ROW_COUNT][DISPLAY_COLUMN_COUNT] = {
     {0, 7, 8, 15},
     {1, 6, 9, 14},
     {2, 5, 10, 13},
     {3, 4, 11, 12},
 };
+static const uint8_t LED_MASK_180[DISPLAY_ROW_COUNT][DISPLAY_COLUMN_COUNT] = {
+    {15, 14, 13, 12},
+    {8, 9, 10, 11},
+    {7, 6, 5, 4},
+    {0, 1, 2, 3},
+};
 static const uint8_t LED_MASK_270[DISPLAY_ROW_COUNT][DISPLAY_COLUMN_COUNT] = {
-    {3, 2, 1, 0},
-    {4, 5, 6, 7},
-    {11, 10, 9, 8},
-    {12, 13, 14, 15},
+    {12, 11, 4, 3},
+    {13, 10, 5, 2},
+    {14, 9, 6, 1},
+    {15, 8, 7, 0},
 };
 
 typedef enum {

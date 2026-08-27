@@ -47,14 +47,14 @@ DisplayRotation Accelerometer_GetRotation(void) {
 
   DisplayRotation candidate;
 
-  if (z > ACCELEROMETER_AXIS_THRESHOLD)
+  if (x < -ACCELEROMETER_AXIS_THRESHOLD)
     candidate = DISPLAY_ROTATION_0;
-  else if (z < -ACCELEROMETER_AXIS_THRESHOLD)
-    candidate = DISPLAY_ROTATION_180;
-  else if (x > ACCELEROMETER_AXIS_THRESHOLD)
-    candidate = DISPLAY_ROTATION_270;
-  else if (x < -ACCELEROMETER_AXIS_THRESHOLD)
+  else if (y < -ACCELEROMETER_AXIS_THRESHOLD)
     candidate = DISPLAY_ROTATION_90;
+  else if (x > ACCELEROMETER_AXIS_THRESHOLD)
+    candidate = DISPLAY_ROTATION_180;
+  else if (y > ACCELEROMETER_AXIS_THRESHOLD)
+    candidate = DISPLAY_ROTATION_270;
   else
     candidate = currentRotation;
 
