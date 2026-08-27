@@ -46,13 +46,15 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     App/Src/app.c
-    Drivers_Custom/Src/th_sensor.c
-    Drivers_Custom/Src/buzzer.c
-    Drivers_Custom/Src/light_sensor.c
     Drivers_Custom/Src/accelerometer.c
-    Drivers_Custom/Src/rtc.c
+    Drivers_Custom/Src/battery_driver.c
+    Drivers_Custom/Src/buzzer.c
     Drivers_Custom/Src/led.c
+    Drivers_Custom/Src/light_sensor.c
+    Drivers_Custom/Src/rtc.c
+    Drivers_Custom/Src/th_sensor.c
     Modules/Src/alarm.c
+    Modules/Src/battery.c
     Modules/Src/binary_clock.c
     Modules/Src/buttons.c
     Modules/Src/date.c

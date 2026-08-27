@@ -1,6 +1,7 @@
 #include "app.h"
 #include "accelerometer.h"
 #include "alarm.h"
+#include "battery.h"
 #include "binary_clock.h"
 #include "buttons.h"
 #include "buzzer.h"
@@ -17,6 +18,7 @@ void App_Init(void) {
   Date_Init();
   Environment_Init();
   Accelerometer_Init();
+  Battery_Init();
   Display_Init();
   Buzzer_Init();
   PowerManager_Init();
@@ -33,6 +35,7 @@ void App_Run(void) {
   BinaryClock_Update();
   Date_Update();
   Environment_Update();
+  Battery_Update();
 
   uint16_t value;
 
@@ -51,6 +54,9 @@ void App_Run(void) {
   case DISPLAY_MODE_ALARM:
     value = (uiState == UI_STATE_NORMAL) ? Alarm_GetDisplayValue()
                                          : Alarm_GetEditDisplayValue();
+    break;
+  case DISPLAY_MODE_BATTERY:
+    value = Battery_GetDisplayValue();
     break;
   default:
     return;
