@@ -10,8 +10,6 @@ static uint32_t lastUpdate = 0;
 static uint16_t Date_GetDateValue(uint8_t day, uint8_t month);
 static uint16_t Date_GetYearValue(uint16_t year);
 static uint8_t IsLeapYear(uint16_t year);
-static uint8_t DaysInMonth(uint8_t month, uint16_t year);
-static void ClampDate(RTC_Date *date);
 
 void Date_Init(void) { RTC_GetDate(&date); }
 
@@ -40,8 +38,6 @@ void Date_BeginEdit(void) {
   editStage = DATE_EDIT_DAY_MONTH;
   dateField = EDIT_DAY_TENS;
   yearField = EDIT_YEAR_THOUSANDS;
-
-  ClampDate(&editDate);
 }
 
 static uint16_t Date_GetDateValue(uint8_t day, uint8_t month) {
@@ -69,45 +65,44 @@ static uint8_t IsLeapYear(uint16_t year) {
     return 0;
   return year % 4 == 0;
 }
+static DisplayColumnMask Date_ValidateDayMonth(void) {
+  uint8_t day = editDate.date;
+  uint8_t month = editDate.month;
 
-static uint8_t DaysInMonth(uint8_t month, uint16_t year) {
+  if (day < 1)
+    return DISPLAY_COLUMN_2;
+  if (day > 31)
+    return DISPLAY_COLUMN_2;
+
+  if (month < 1)
+    return DISPLAY_COLUMN_4;
+  if (month > 12)
+    return DISPLAY_COLUMN_4;
+
+  uint8_t maxDays;
   switch (month) {
   case 2:
-    return IsLeapYear(year) ? 29 : 28;
+    maxDays = 29;
+    break;
   case 4:
   case 6:
   case 9:
   case 11:
-    return 30;
-  case 1:
-  case 3:
-  case 5:
-  case 7:
-  case 8:
-  case 10:
-  case 12:
+    maxDays = 30;
+    break;
   default:
-    return 31;
+    maxDays = 31;
+    break;
   }
+  if (day > maxDays)
+    return DISPLAY_COLUMN_2;
+  return DISPLAY_COLUMN_NONE;
 }
 
-static void ClampDate(RTC_Date *date) {
-  if (date->year < 2000)
-    date->year = 2000;
-  else if (date->year > 2099)
-    date->year = 2099;
-
-  if (date->month < 1)
-    date->month = 1;
-  else if (date->month > 12)
-    date->month = 12;
-
-  uint8_t maxDays = DaysInMonth(date->month, date->year);
-
-  if (date->date < 1)
-    date->date = 1;
-  else if (date->date > maxDays)
-    date->date = maxDays;
+static DisplayColumnMask Date_ValidateYear(void) {
+  if (editDate.year > 2099)
+    return DISPLAY_COLUMN_2;
+  return DISPLAY_COLUMN_NONE;
 }
 
 void Date_SelectNextField(void) {
@@ -144,27 +139,18 @@ void Date_IncrementSelected(void) {
     case EDIT_MONTH_TENS:
       tens = editDate.month / 10;
       ones = editDate.month % 10;
-      tens = (tens == 0) ? 1 : 0;
-      if (tens == 0 && ones == 0)
-        ones = 1;
-      if (tens == 1 && ones > 2)
-        ones = 2;
+      tens = (tens + 1) % 2;
       editDate.month = tens * 10 + ones;
       break;
     case EDIT_MONTH_ONES:
       tens = editDate.month / 10;
       ones = editDate.month % 10;
-      if (tens == 0)
-        ones = (ones == 9) ? 1 : ones + 1;
-      else
-        ones = (ones + 1) % 3;
+      ones = (ones + 1) % 10;
       editDate.month = tens * 10 + ones;
       break;
     default:
       break;
     }
-
-    ClampDate(&editDate);
     return;
   }
 
@@ -191,8 +177,6 @@ void Date_IncrementSelected(void) {
   }
 
   editDate.year = thousands * 1000 + hundreds * 100 + yearTens * 10 + yearOnes;
-
-  ClampDate(&editDate);
 }
 
 void Date_DecrementSelected(void) {
@@ -216,26 +200,18 @@ void Date_DecrementSelected(void) {
     case EDIT_MONTH_TENS:
       tens = editDate.month / 10;
       ones = editDate.month % 10;
-      tens = (tens == 0) ? 1 : 0;
-      if (tens == 0 && ones == 0)
-        ones = 1;
-      if (tens == 1 && ones > 2)
-        ones = 2;
+      tens = (tens == 0) ? 1 : tens - 1;
       editDate.month = tens * 10 + ones;
       break;
     case EDIT_MONTH_ONES:
       tens = editDate.month / 10;
       ones = editDate.month % 10;
-      if (tens == 0)
-        ones = (ones == 1) ? 9 : ones - 1;
-      else
-        ones = (ones == 0) ? 2 : ones - 1;
+      ones = (ones == 0) ? 9 : ones - 1;
       editDate.month = tens * 10 + ones;
       break;
     default:
       break;
     }
-    ClampDate(&editDate);
     return;
   }
 
@@ -262,28 +238,36 @@ void Date_DecrementSelected(void) {
   }
 
   editDate.year = thousands * 1000 + hundreds * 100 + yearTens * 10 + yearOnes;
-
-  ClampDate(&editDate);
 }
 
-uint8_t Date_SaveEdit(void) {
+DisplayColumnMask Date_SaveEdit(void) {
   if (editStage == DATE_EDIT_DAY_MONTH) {
+    DisplayColumnMask errors = Date_ValidateDayMonth();
+    if (errors != DISPLAY_COLUMN_NONE)
+      return errors;
     editStage = DATE_EDIT_YEAR;
     yearField = EDIT_YEAR_THOUSANDS;
-    ClampDate(&editDate);
-
-    return 0;
+    return DISPLAY_COLUMN_NONE;
   }
 
-  ClampDate(&editDate);
-  if (RTC_SetDate(&editDate) != HAL_OK)
-    return 0;
-  RTC_GetDate(&date);
+  DisplayColumnMask errors = Date_ValidateYear();
+  if (errors != DISPLAY_COLUMN_NONE)
+    return errors;
+  if (editDate.month == 2 && editDate.date == 29 &&
+      !IsLeapYear(editDate.year)) {
+    editDate.date = 28;
+  }
+  if (RTC_SetDate(&editDate) != HAL_OK) {
+    return DISPLAY_COLUMN_NONE;
+  }
 
-  return 1;
+  RTC_GetDate(&date);
+  editStage = DATE_EDIT_DAY_MONTH;
+
+  return DISPLAY_COLUMN_NONE;
 }
 
-DisplayColumn Date_GetSelectedColumn(void) {
+DisplayColumnMask Date_GetSelectedColumn(void) {
   if (editStage == DATE_EDIT_DAY_MONTH) {
     switch (dateField) {
     case EDIT_DAY_TENS:
@@ -312,3 +296,5 @@ DisplayColumn Date_GetSelectedColumn(void) {
     return DISPLAY_COLUMN_NONE;
   }
 }
+
+uint8_t Date_IsYearEdit(void) { return editStage == DATE_EDIT_YEAR; }

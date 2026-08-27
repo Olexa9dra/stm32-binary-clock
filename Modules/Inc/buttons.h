@@ -9,7 +9,7 @@
 #define BUTTON3_PIN GPIO_PIN_3
 #define BUTTON4_PIN GPIO_PIN_4
 #define BUTTON_COUNT 4U
-#define BUTTON_DEBOUNCE_MS 20U
+#define BUTTON_DEBOUNCE_MS 50U
 
 static const uint8_t BUTTON_MASK_0[BUTTON_COUNT] = {0, 1, 2, 3};
 static const uint8_t BUTTON_MASK_90[BUTTON_COUNT] = {0, 1, 2, 3};

@@ -128,11 +128,16 @@ static void Buttons_HandleEditTimeState(uint16_t button) {
     BinaryClock_SelectNextField();
     Display_SetBlinkColumn(BinaryClock_GetSelectedColumn());
     break;
-  case BUTTON4_PIN:
-    BinaryClock_SaveEdit();
-    Display_SetBlinkColumn(DISPLAY_COLUMN_NONE);
-    App_SetUiState(UI_STATE_NORMAL);
+  case BUTTON4_PIN: {
+    DisplayColumnMask errors = BinaryClock_SaveEdit();
+    if (errors == DISPLAY_COLUMN_NONE) {
+      Display_SetBlinkColumn(DISPLAY_COLUMN_NONE);
+      App_SetUiState(UI_STATE_NORMAL);
+    } else {
+      Display_StartErrorBlink(errors);
+    }
     break;
+  }
   default:
     break;
   }
@@ -150,14 +155,20 @@ static void Buttons_HandleEditDateState(uint16_t button) {
     Date_SelectNextField();
     Display_SetBlinkColumn(Date_GetSelectedColumn());
     break;
-  case BUTTON4_PIN:
-    if (Date_SaveEdit()) {
+  case BUTTON4_PIN: {
+    DisplayColumnMask errors = Date_SaveEdit();
+    if (errors != DISPLAY_COLUMN_NONE) {
+      Display_StartErrorBlink(errors);
+      break;
+    }
+    if (Date_IsYearEdit()) {
+      Display_SetBlinkColumn(Date_GetSelectedColumn());
+    } else {
       Display_SetBlinkColumn(DISPLAY_COLUMN_NONE);
       App_SetUiState(UI_STATE_NORMAL);
-    } else {
-      Display_SetBlinkColumn(Date_GetSelectedColumn());
     }
     break;
+  }
   default:
     break;
   }
@@ -175,11 +186,16 @@ static void Buttons_HandleEditAlarmState(uint16_t button) {
     Alarm_SelectNextField();
     Display_SetBlinkColumn(Alarm_GetSelectedColumn());
     break;
-  case BUTTON4_PIN:
-    Alarm_SaveEdit();
-    Display_SetBlinkColumn(DISPLAY_COLUMN_NONE);
-    App_SetUiState(UI_STATE_NORMAL);
+  case BUTTON4_PIN: {
+    DisplayColumnMask errors = Alarm_SaveEdit();
+    if (errors == DISPLAY_COLUMN_NONE) {
+      Display_SetBlinkColumn(DISPLAY_COLUMN_NONE);
+      App_SetUiState(UI_STATE_NORMAL);
+    } else {
+      Display_StartErrorBlink(errors);
+    }
     break;
+  }
   default:
     break;
   }

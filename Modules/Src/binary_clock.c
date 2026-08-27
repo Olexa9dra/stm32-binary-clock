@@ -56,18 +56,12 @@ void BinaryClock_IncrementSelected(void) {
     tens = editClock.hour / 10;
     ones = editClock.hour % 10;
     tens = (tens + 1) % 3;
-    if (tens == 2 && ones > 3)
-      ones = 3;
     editClock.hour = tens * 10 + ones;
     break;
-
   case EDIT_HOURS_ONES:
     tens = editClock.hour / 10;
     ones = editClock.hour % 10;
-    if (tens == 2)
-      ones = (ones + 1) % 4;
-    else
-      ones = (ones + 1) % 10;
+    ones = (ones + 1) % 10;
     editClock.hour = tens * 10 + ones;
     break;
   case EDIT_MINUTES_TENS:
@@ -96,17 +90,12 @@ void BinaryClock_DecrementSelected(void) {
     tens = editClock.hour / 10;
     ones = editClock.hour % 10;
     tens = (tens == 0) ? 2 : tens - 1;
-    if (tens == 2 && ones > 3)
-      ones = 3;
     editClock.hour = tens * 10 + ones;
     break;
   case EDIT_HOURS_ONES:
     tens = editClock.hour / 10;
     ones = editClock.hour % 10;
-    if (tens == 2)
-      ones = (ones == 0) ? 3 : ones - 1;
-    else
-      ones = (ones == 0) ? 9 : ones - 1;
+    ones = (ones == 0) ? 9 : ones - 1;
     editClock.hour = tens * 10 + ones;
     break;
   case EDIT_MINUTES_TENS:
@@ -126,13 +115,29 @@ void BinaryClock_DecrementSelected(void) {
   }
 }
 
-void BinaryClock_SaveEdit(void) {
-  editClock.second = 0;
-  if (RTC_SetTime(&editClock) == HAL_OK)
-    clock = editClock;
+static DisplayColumnMask BinaryClock_ValidateEdit(void) {
+  DisplayColumnMask errors = DISPLAY_COLUMN_NONE;
+  uint8_t hourTens = editClock.hour / 10;
+  uint8_t hourOnes = editClock.hour % 10;
+  if (hourTens == 2 && hourOnes > 3)
+    errors |= DISPLAY_COLUMN_2;
+  return errors;
 }
 
-DisplayColumn BinaryClock_GetSelectedColumn(void) {
+DisplayColumnMask BinaryClock_SaveEdit(void) {
+  DisplayColumnMask errors = BinaryClock_ValidateEdit();
+  if (errors != DISPLAY_COLUMN_NONE)
+    return errors;
+
+  editClock.second = 0;
+  if (RTC_SetTime(&editClock) == HAL_OK) {
+    clock = editClock;
+  }
+
+  return DISPLAY_COLUMN_NONE;
+}
+
+DisplayColumnMask BinaryClock_GetSelectedColumn(void) {
   switch (editField) {
   case EDIT_HOURS_TENS:
     return DISPLAY_COLUMN_1;

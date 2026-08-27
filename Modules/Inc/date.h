@@ -28,11 +28,12 @@ void Date_Init(void);
 void Date_Update(void);
 uint16_t Date_GetDisplayValue(void);
 uint16_t Date_GetEditDisplayValue(void);
-DisplayColumn Date_GetSelectedColumn(void);
+DisplayColumnMask Date_GetSelectedColumn(void);
 void Date_BeginEdit(void);
 void Date_IncrementSelected(void);
 void Date_DecrementSelected(void);
 void Date_SelectNextField(void);
-uint8_t Date_SaveEdit(void);
+DisplayColumnMask Date_SaveEdit(void);
+uint8_t Date_IsYearEdit(void);
 
 #endif

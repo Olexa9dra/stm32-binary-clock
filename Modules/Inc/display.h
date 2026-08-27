@@ -6,11 +6,17 @@
 #define DISPLAY_COLUMN_COUNT 4
 #define DISPLAY_ROW_COUNT 4
 #define DISPLAY_BLINK_INTERVAL_MS 500U
+#define DISPLAY_ERROR_BLINK_DURATION_MS 1500U
 #define COLOR_YELLOW 255, 255, 0
 #define COLOR_GREEN 0, 255, 0
 #define COLOR_RED 255, 0, 0
 #define COLOR_BLUE 0, 0, 255
 #define COLOR_PURPLE 255, 0, 255
+#define DISPLAY_COLUMN_NONE 0U
+#define DISPLAY_COLUMN_1 (1U << 0)
+#define DISPLAY_COLUMN_2 (1U << 1)
+#define DISPLAY_COLUMN_3 (1U << 2)
+#define DISPLAY_COLUMN_4 (1U << 3)
 
 static const uint8_t LED_MASK_0[DISPLAY_ROW_COUNT][DISPLAY_COLUMN_COUNT] = {
     {12, 11, 4, 3},
@@ -45,16 +51,11 @@ typedef enum {
   DISPLAY_MODE_COUNT,
 } DisplayMode;
 
-typedef enum {
-  DISPLAY_COLUMN_1,
-  DISPLAY_COLUMN_2,
-  DISPLAY_COLUMN_3,
-  DISPLAY_COLUMN_4,
-  DISPLAY_COLUMN_NONE,
-} DisplayColumn;
+typedef uint8_t DisplayColumnMask;
 
 void Display_Init(void);
 void Display_Show(uint16_t value, DisplayMode mode);
-void Display_SetBlinkColumn(DisplayColumn column);
+void Display_SetBlinkColumn(DisplayColumnMask column);
+void Display_StartErrorBlink(DisplayColumnMask columns);
 
 #endif

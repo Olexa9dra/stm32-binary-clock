@@ -17,12 +17,12 @@ typedef enum {
 void Alarm_Update(void);
 uint16_t Alarm_GetDisplayValue(void);
 uint16_t Alarm_GetEditDisplayValue(void);
-DisplayColumn Alarm_GetSelectedColumn(void);
+DisplayColumnMask Alarm_GetSelectedColumn(void);
 void Alarm_BeginEdit(void);
 void Alarm_SelectNextField(void);
 void Alarm_IncrementSelected(void);
 void Alarm_DecrementSelected(void);
-void Alarm_SaveEdit(void);
+DisplayColumnMask Alarm_SaveEdit(void);
 void Alarm_Disable(void);
 uint8_t Alarm_IsRinging(void);
 

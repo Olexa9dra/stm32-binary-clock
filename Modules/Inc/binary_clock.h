@@ -18,11 +18,11 @@ void BinaryClock_Init(void);
 void BinaryClock_Update(void);
 uint16_t BinaryClock_GetDisplayValue(void);
 uint16_t BinaryClock_GetEditDisplayValue(void);
-DisplayColumn BinaryClock_GetSelectedColumn(void);
+DisplayColumnMask BinaryClock_GetSelectedColumn(void);
 void BinaryClock_BeginEdit(void);
 void BinaryClock_SelectNextField(void);
 void BinaryClock_IncrementSelected(void);
 void BinaryClock_DecrementSelected(void);
-void BinaryClock_SaveEdit(void);
+DisplayColumnMask BinaryClock_SaveEdit(void);
 
 #endif

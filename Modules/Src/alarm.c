@@ -94,51 +94,25 @@ void Alarm_IncrementSelected(void) {
   case ALARM_EDIT_HOURS_TENS:
     tens = editAlarmTime.hour / 10;
     ones = editAlarmTime.hour % 10;
-    tens++;
-    if (tens > 2)
-      tens = 0;
-    if (tens == 2 && ones > 4)
-      ones = 4;
+    tens = (tens + 1) % 3;
     editAlarmTime.hour = tens * 10 + ones;
     break;
   case ALARM_EDIT_HOURS_ONES:
     tens = editAlarmTime.hour / 10;
     ones = editAlarmTime.hour % 10;
-    if (tens == 2) {
-      ones++;
-      if (ones > 4)
-        ones = 0;
-    } else {
-      ones++;
-      if (ones > 9)
-        ones = 0;
-    }
+    ones = (ones + 1) % 10;
     editAlarmTime.hour = tens * 10 + ones;
-    if (editAlarmTime.hour == 24)
-      editAlarmTime.minute = 0;
     break;
   case ALARM_EDIT_MINUTES_TENS:
-    if (editAlarmTime.hour == 24) {
-      editAlarmTime.minute = 0;
-      break;
-    }
     tens = editAlarmTime.minute / 10;
     ones = editAlarmTime.minute % 10;
-    tens++;
-    if (tens > 5)
-      tens = 0;
+    tens = (tens + 1) % 6;
     editAlarmTime.minute = tens * 10 + ones;
     break;
   case ALARM_EDIT_MINUTES_ONES:
-    if (editAlarmTime.hour == 24) {
-      editAlarmTime.minute = 0;
-      break;
-    }
     tens = editAlarmTime.minute / 10;
     ones = editAlarmTime.minute % 10;
-    ones++;
-    if (ones > 9)
-      ones = 0;
+    ones = (ones + 1) % 10;
     editAlarmTime.minute = tens * 10 + ones;
     break;
   default:
@@ -154,54 +128,25 @@ void Alarm_DecrementSelected(void) {
   case ALARM_EDIT_HOURS_TENS:
     tens = editAlarmTime.hour / 10;
     ones = editAlarmTime.hour % 10;
-    if (tens == 0)
-      tens = 2;
-    else
-      tens--;
-    if (tens == 2 && ones > 4)
-      ones = 4;
+    tens = (tens == 0) ? 2 : tens - 1;
     editAlarmTime.hour = tens * 10 + ones;
     break;
   case ALARM_EDIT_HOURS_ONES:
     tens = editAlarmTime.hour / 10;
     ones = editAlarmTime.hour % 10;
-    if (tens == 2) {
-      if (ones == 0)
-        ones = 4;
-      else
-        ones--;
-    } else {
-      if (ones == 0)
-        ones = 9;
-      else
-        ones--;
-    }
+    ones = (ones == 0) ? 9 : ones - 1;
     editAlarmTime.hour = tens * 10 + ones;
     break;
   case ALARM_EDIT_MINUTES_TENS:
-    if (editAlarmTime.hour == 24) {
-      editAlarmTime.minute = 0;
-      break;
-    }
     tens = editAlarmTime.minute / 10;
     ones = editAlarmTime.minute % 10;
-    if (tens == 0)
-      tens = 5;
-    else
-      tens--;
+    tens = (tens == 0) ? 5 : tens - 1;
     editAlarmTime.minute = tens * 10 + ones;
     break;
   case ALARM_EDIT_MINUTES_ONES:
-    if (editAlarmTime.hour == 24) {
-      editAlarmTime.minute = 0;
-      break;
-    }
     tens = editAlarmTime.minute / 10;
     ones = editAlarmTime.minute % 10;
-    if (ones == 0)
-      ones = 9;
-    else
-      ones--;
+    ones = (ones == 0) ? 9 : ones - 1;
     editAlarmTime.minute = tens * 10 + ones;
     break;
   default:
@@ -209,7 +154,30 @@ void Alarm_DecrementSelected(void) {
   }
 }
 
-void Alarm_SaveEdit(void) {
+static DisplayColumnMask Alarm_ValidateEdit(void) {
+  uint8_t hourTens = editAlarmTime.hour / 10;
+  uint8_t hourOnes = editAlarmTime.hour % 10;
+
+  if (hourTens > 2)
+    return DISPLAY_COLUMN_1;
+  if (hourTens == 2 && hourOnes > 4)
+    return DISPLAY_COLUMN_2;
+  if (hourTens == 2 && hourOnes == 4) {
+    if (editAlarmTime.minute / 10 != 0)
+      return DISPLAY_COLUMN_3;
+    if (editAlarmTime.minute % 10 != 0)
+      return DISPLAY_COLUMN_4;
+  }
+
+  return DISPLAY_COLUMN_NONE;
+}
+
+DisplayColumnMask Alarm_SaveEdit(void) {
+  DisplayColumnMask errors = Alarm_ValidateEdit();
+
+  if (errors != DISPLAY_COLUMN_NONE)
+    return errors;
+
   Buzzer_StopAlarm();
   alarmRinging = 0;
 
@@ -220,12 +188,13 @@ void Alarm_SaveEdit(void) {
       editAlarmTime.hour = 0;
       editAlarmTime.minute = 0;
     }
-
     alarmTime = editAlarmTime;
     alarmEnabled = 1;
   }
 
   lastTriggeredMinute = UINT32_MAX;
+
+  return DISPLAY_COLUMN_NONE;
 }
 
 void Alarm_Disable(void) { Alarm_Clear(); }
@@ -239,7 +208,7 @@ static void Alarm_Clear(void) {
   Buzzer_StopAlarm();
 }
 
-DisplayColumn Alarm_GetSelectedColumn(void) {
+DisplayColumnMask Alarm_GetSelectedColumn(void) {
   switch (editField) {
   case ALARM_EDIT_HOURS_TENS:
     return DISPLAY_COLUMN_1;
