@@ -2,17 +2,10 @@
 #define __ALARM_H
 
 #include "display.h"
+#include "editor.h"
 #include "rtc.h"
 
 #define ALARM_UPDATE_DELAY_MS 250U
-
-typedef enum {
-  ALARM_EDIT_HOURS_TENS,
-  ALARM_EDIT_HOURS_ONES,
-  ALARM_EDIT_MINUTES_TENS,
-  ALARM_EDIT_MINUTES_ONES,
-  ALARM_EDIT_COUNT
-} AlarmEditField;
 
 void Alarm_Update(void);
 uint16_t Alarm_GetDisplayValue(void);

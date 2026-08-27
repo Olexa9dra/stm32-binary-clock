@@ -1,16 +1,25 @@
 #include "alarm.h"
 #include "buzzer.h"
+#include "editor.h"
 
 static RTC_Time alarmTime = {0};
 static RTC_Time editAlarmTime = {0};
-static AlarmEditField editField = ALARM_EDIT_HOURS_TENS;
 static uint8_t alarmEnabled = 0;
 static uint32_t lastUpdate = 0;
 static uint32_t lastTriggeredMinute = UINT32_MAX;
 static uint8_t alarmRinging = 0;
+static Editor alarmEditor;
+
+static const EditorDigitRestriction alarmRestrictions[EDITOR_FIELD_COUNT] = {
+    {0, 2, 1},
+    {0, 9, 1},
+    {0, 5, 1},
+    {0, 9, 1},
+};
 
 static uint16_t Alarm_GetTimeValue(uint8_t hour, uint8_t minute);
 static void Alarm_Clear(void);
+static void Alarm_UpdateEditTime(void);
 
 void Alarm_Update(void) {
   if (alarmRinging) {
@@ -54,6 +63,8 @@ uint16_t Alarm_GetDisplayValue(void) {
 }
 
 uint16_t Alarm_GetEditDisplayValue(void) {
+  Alarm_UpdateEditTime();
+
   if (alarmEnabled == 0 && editAlarmTime.hour == 0 &&
       editAlarmTime.minute == 0) {
     return 0;
@@ -77,81 +88,29 @@ static uint16_t Alarm_GetTimeValue(uint8_t hour, uint8_t minute) {
 
 void Alarm_BeginEdit(void) {
   editAlarmTime = alarmTime;
-  editField = ALARM_EDIT_HOURS_TENS;
+
+  uint8_t digits[] = {
+      editAlarmTime.hour / 10,
+      editAlarmTime.hour % 10,
+      editAlarmTime.minute / 10,
+      editAlarmTime.minute % 10,
+  };
+
+  Editor_Begin(&alarmEditor, digits, alarmRestrictions);
 }
 
-void Alarm_SelectNextField(void) {
-  editField++;
-  if (editField >= ALARM_EDIT_COUNT)
-    editField = ALARM_EDIT_HOURS_TENS;
-}
+void Alarm_SelectNextField(void) { Editor_SelectNext(&alarmEditor); }
 
-void Alarm_IncrementSelected(void) {
-  uint8_t tens;
-  uint8_t ones;
+void Alarm_IncrementSelected(void) { Editor_Increment(&alarmEditor); }
 
-  switch (editField) {
-  case ALARM_EDIT_HOURS_TENS:
-    tens = editAlarmTime.hour / 10;
-    ones = editAlarmTime.hour % 10;
-    tens = (tens + 1) % 3;
-    editAlarmTime.hour = tens * 10 + ones;
-    break;
-  case ALARM_EDIT_HOURS_ONES:
-    tens = editAlarmTime.hour / 10;
-    ones = editAlarmTime.hour % 10;
-    ones = (ones + 1) % 10;
-    editAlarmTime.hour = tens * 10 + ones;
-    break;
-  case ALARM_EDIT_MINUTES_TENS:
-    tens = editAlarmTime.minute / 10;
-    ones = editAlarmTime.minute % 10;
-    tens = (tens + 1) % 6;
-    editAlarmTime.minute = tens * 10 + ones;
-    break;
-  case ALARM_EDIT_MINUTES_ONES:
-    tens = editAlarmTime.minute / 10;
-    ones = editAlarmTime.minute % 10;
-    ones = (ones + 1) % 10;
-    editAlarmTime.minute = tens * 10 + ones;
-    break;
-  default:
-    break;
-  }
-}
+void Alarm_DecrementSelected(void) { Editor_Decrement(&alarmEditor); }
 
-void Alarm_DecrementSelected(void) {
-  uint8_t tens;
-  uint8_t ones;
+static void Alarm_UpdateEditTime(void) {
+  editAlarmTime.hour =
+      Editor_GetDigit(&alarmEditor, 0) * 10 + Editor_GetDigit(&alarmEditor, 1);
 
-  switch (editField) {
-  case ALARM_EDIT_HOURS_TENS:
-    tens = editAlarmTime.hour / 10;
-    ones = editAlarmTime.hour % 10;
-    tens = (tens == 0) ? 2 : tens - 1;
-    editAlarmTime.hour = tens * 10 + ones;
-    break;
-  case ALARM_EDIT_HOURS_ONES:
-    tens = editAlarmTime.hour / 10;
-    ones = editAlarmTime.hour % 10;
-    ones = (ones == 0) ? 9 : ones - 1;
-    editAlarmTime.hour = tens * 10 + ones;
-    break;
-  case ALARM_EDIT_MINUTES_TENS:
-    tens = editAlarmTime.minute / 10;
-    ones = editAlarmTime.minute % 10;
-    tens = (tens == 0) ? 5 : tens - 1;
-    editAlarmTime.minute = tens * 10 + ones;
-    break;
-  case ALARM_EDIT_MINUTES_ONES:
-    tens = editAlarmTime.minute / 10;
-    ones = editAlarmTime.minute % 10;
-    ones = (ones == 0) ? 9 : ones - 1;
-    editAlarmTime.minute = tens * 10 + ones;
-    break;
-  default:
-    break;
-  }
+  editAlarmTime.minute =
+      Editor_GetDigit(&alarmEditor, 2) * 10 + Editor_GetDigit(&alarmEditor, 3);
 }
 
 static DisplayColumnMask Alarm_ValidateEdit(void) {
@@ -173,6 +132,7 @@ static DisplayColumnMask Alarm_ValidateEdit(void) {
 }
 
 DisplayColumnMask Alarm_SaveEdit(void) {
+  Alarm_UpdateEditTime();
   DisplayColumnMask errors = Alarm_ValidateEdit();
 
   if (errors != DISPLAY_COLUMN_NONE)
@@ -209,18 +169,7 @@ static void Alarm_Clear(void) {
 }
 
 DisplayColumnMask Alarm_GetSelectedColumn(void) {
-  switch (editField) {
-  case ALARM_EDIT_HOURS_TENS:
-    return DISPLAY_COLUMN_1;
-  case ALARM_EDIT_HOURS_ONES:
-    return DISPLAY_COLUMN_2;
-  case ALARM_EDIT_MINUTES_TENS:
-    return DISPLAY_COLUMN_3;
-  case ALARM_EDIT_MINUTES_ONES:
-    return DISPLAY_COLUMN_4;
-  default:
-    return DISPLAY_COLUMN_NONE;
-  }
+  return Editor_GetSelectedColumn(&alarmEditor);
 }
 
 uint8_t Alarm_IsRinging(void) { return alarmRinging; }

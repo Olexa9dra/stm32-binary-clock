@@ -2,25 +2,10 @@
 #define __DATE_H
 
 #include "display.h"
+#include "editor.h"
 #include "rtc.h"
 
 #define DATE_UPDATE_DELAY_MS 250U
-
-typedef enum {
-  EDIT_DAY_TENS,
-  EDIT_DAY_ONES,
-  EDIT_MONTH_TENS,
-  EDIT_MONTH_ONES,
-  EDIT_DAY_MONTH_COUNT
-} DateField;
-
-typedef enum {
-  EDIT_YEAR_THOUSANDS,
-  EDIT_YEAR_HUNDREDS,
-  EDIT_YEAR_TENS,
-  EDIT_YEAR_ONES,
-  EDIT_YEAR_COUNT
-} YearField;
 
 typedef enum { DATE_EDIT_DAY_MONTH, DATE_EDIT_YEAR } DateEditStage;
 

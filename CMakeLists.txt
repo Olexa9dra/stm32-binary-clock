@@ -59,6 +59,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Modules/Src/display.c
     Modules/Src/environment.c
     Modules/Src/power_manager.c
+    Utils/Src/editor.c
 )
 
 # Add include paths
@@ -67,6 +68,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     App/Inc
     Drivers_Custom/Inc
     Modules/Inc
+    Utils/Inc
 )
 
 # Add project symbols (macros)

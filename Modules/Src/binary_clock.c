@@ -1,11 +1,21 @@
 #include "binary_clock.h"
+#include "editor.h"
 
 static RTC_Time clock;
 static RTC_Time editClock;
-static EditField editField;
 static uint32_t lastUpdate = 0;
+static Editor clockEditor;
+
+static const EditorDigitRestriction clockRestrictions[EDITOR_FIELD_COUNT] = {
+    {0, 2, 1},
+    {0, 9, 1},
+    {0, 5, 1},
+    {0, 9, 1},
+};
 
 static uint16_t BinaryClock_GetTimeValue(uint8_t hour, uint8_t minute);
+static void BinaryClock_UpdateEditTime(void);
+static DisplayColumnMask BinaryClock_ValidateEdit(void);
 
 void BinaryClock_Init(void) { RTC_GetTime(&clock); }
 
@@ -24,6 +34,7 @@ uint16_t BinaryClock_GetDisplayValue(void) {
 }
 
 uint16_t BinaryClock_GetEditDisplayValue(void) {
+  BinaryClock_UpdateEditTime();
   return BinaryClock_GetTimeValue(editClock.hour, editClock.minute);
 }
 
@@ -38,90 +49,42 @@ static uint16_t BinaryClock_GetTimeValue(uint8_t hour, uint8_t minute) {
 
 void BinaryClock_BeginEdit(void) {
   RTC_GetTime(&editClock);
-  editField = EDIT_HOURS_TENS;
+
+  uint8_t digits[] = {
+      editClock.hour / 10,
+      editClock.hour % 10,
+      editClock.minute / 10,
+      editClock.minute % 10,
+  };
+
+  Editor_Begin(&clockEditor, digits, clockRestrictions);
 }
 
-void BinaryClock_SelectNextField(void) {
-  editField++;
-  if (editField >= EDIT_COUNT)
-    editField = EDIT_HOURS_TENS;
+void BinaryClock_IncrementSelected(void) { Editor_Increment(&clockEditor); }
+
+void BinaryClock_DecrementSelected(void) { Editor_Decrement(&clockEditor); }
+
+void BinaryClock_SelectNextField(void) { Editor_SelectNext(&clockEditor); }
+
+DisplayColumnMask BinaryClock_GetSelectedColumn(void) {
+  return Editor_GetSelectedColumn(&clockEditor);
 }
 
-void BinaryClock_IncrementSelected(void) {
-  uint8_t tens;
-  uint8_t ones;
+static void BinaryClock_UpdateEditTime(void) {
+  editClock.hour =
+      Editor_GetDigit(&clockEditor, 0) * 10 + Editor_GetDigit(&clockEditor, 1);
 
-  switch (editField) {
-  case EDIT_HOURS_TENS:
-    tens = editClock.hour / 10;
-    ones = editClock.hour % 10;
-    tens = (tens + 1) % 3;
-    editClock.hour = tens * 10 + ones;
-    break;
-  case EDIT_HOURS_ONES:
-    tens = editClock.hour / 10;
-    ones = editClock.hour % 10;
-    ones = (ones + 1) % 10;
-    editClock.hour = tens * 10 + ones;
-    break;
-  case EDIT_MINUTES_TENS:
-    tens = editClock.minute / 10;
-    ones = editClock.minute % 10;
-    tens = (tens + 1) % 6;
-    editClock.minute = tens * 10 + ones;
-    break;
-  case EDIT_MINUTES_ONES:
-    tens = editClock.minute / 10;
-    ones = editClock.minute % 10;
-    ones = (ones + 1) % 10;
-    editClock.minute = tens * 10 + ones;
-    break;
-  default:
-    break;
-  }
-}
-
-void BinaryClock_DecrementSelected(void) {
-  uint8_t tens;
-  uint8_t ones;
-
-  switch (editField) {
-  case EDIT_HOURS_TENS:
-    tens = editClock.hour / 10;
-    ones = editClock.hour % 10;
-    tens = (tens == 0) ? 2 : tens - 1;
-    editClock.hour = tens * 10 + ones;
-    break;
-  case EDIT_HOURS_ONES:
-    tens = editClock.hour / 10;
-    ones = editClock.hour % 10;
-    ones = (ones == 0) ? 9 : ones - 1;
-    editClock.hour = tens * 10 + ones;
-    break;
-  case EDIT_MINUTES_TENS:
-    tens = editClock.minute / 10;
-    ones = editClock.minute % 10;
-    tens = (tens == 0) ? 5 : tens - 1;
-    editClock.minute = tens * 10 + ones;
-    break;
-  case EDIT_MINUTES_ONES:
-    tens = editClock.minute / 10;
-    ones = editClock.minute % 10;
-    ones = (ones == 0) ? 9 : ones - 1;
-    editClock.minute = tens * 10 + ones;
-    break;
-  default:
-    break;
-  }
+  editClock.minute =
+      Editor_GetDigit(&clockEditor, 2) * 10 + Editor_GetDigit(&clockEditor, 3);
 }
 
 static DisplayColumnMask BinaryClock_ValidateEdit(void) {
-  DisplayColumnMask errors = DISPLAY_COLUMN_NONE;
-  uint8_t hourTens = editClock.hour / 10;
-  uint8_t hourOnes = editClock.hour % 10;
-  if (hourTens == 2 && hourOnes > 3)
-    errors |= DISPLAY_COLUMN_2;
-  return errors;
+  BinaryClock_UpdateEditTime();
+
+  if (editClock.hour > 23)
+    return DISPLAY_COLUMN_2;
+
+  return DISPLAY_COLUMN_NONE;
 }
 
 DisplayColumnMask BinaryClock_SaveEdit(void) {
@@ -135,19 +98,4 @@ DisplayColumnMask BinaryClock_SaveEdit(void) {
   }
 
   return DISPLAY_COLUMN_NONE;
-}
-
-DisplayColumnMask BinaryClock_GetSelectedColumn(void) {
-  switch (editField) {
-  case EDIT_HOURS_TENS:
-    return DISPLAY_COLUMN_1;
-  case EDIT_HOURS_ONES:
-    return DISPLAY_COLUMN_2;
-  case EDIT_MINUTES_TENS:
-    return DISPLAY_COLUMN_3;
-  case EDIT_MINUTES_ONES:
-    return DISPLAY_COLUMN_4;
-  default:
-    return DISPLAY_COLUMN_NONE;
-  }
 }
