@@ -68,12 +68,8 @@ void Battery_Update(void) {
   }
 }
 
-uint8_t Battery_GetPercentage(void) { return batteryPercentage; }
-
-float Battery_GetVoltage(void) { return batteryVoltage; }
-
 uint16_t Battery_GetDisplayValue(void) {
-  uint8_t percentage = Battery_GetPercentage();
+  uint8_t percentage = batteryPercentage;
   uint8_t hundreds = percentage / 100;
   uint8_t tens = (percentage / 10) % 10;
   uint8_t ones = percentage % 10;

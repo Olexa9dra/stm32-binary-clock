@@ -13,8 +13,6 @@
 
 void Battery_Init(void);
 void Battery_Update(void);
-uint8_t Battery_GetPercentage(void);
-float Battery_GetVoltage(void);
 uint16_t Battery_GetDisplayValue(void);
 
 #endif
