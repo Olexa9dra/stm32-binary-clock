@@ -1,7 +1,5 @@
 #include "light_sensor.h"
-#include "main.h"
-
-extern ADC_HandleTypeDef hadc1;
+#include "adc_utils.h"
 
 static uint16_t rawValue;
 static uint8_t brightness = BRIGHTNESS_MIN;
@@ -21,14 +19,9 @@ void LightSensor_Update(void) {
     return;
 
   lastUpdate = now;
-  HAL_ADC_Start(&hadc1);
-  if (HAL_ADC_PollForConversion(&hadc1, ADC_POLL_TIMEOUT_MS) != HAL_OK) {
-    HAL_ADC_Stop(&hadc1);
-    return;
-  }
 
-  uint16_t newValue = HAL_ADC_GetValue(&hadc1);
-  HAL_ADC_Stop(&hadc1);
+  uint16_t newValue = ADC_ReadLight();
+
   if (!initialized) {
     rawValue = newValue;
     initialized = 1;

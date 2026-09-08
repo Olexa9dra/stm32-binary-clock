@@ -61,6 +61,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Modules/Src/display.c
     Modules/Src/environment.c
     Modules/Src/power_manager.c
+    Utils/Src/adc_utils.c
     Utils/Src/editor.c
 )
 
