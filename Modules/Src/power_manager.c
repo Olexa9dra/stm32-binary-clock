@@ -3,8 +3,9 @@
 #include "led.h"
 
 static PowerState state = POWER_STATE_ACTIVE;
-
 static uint32_t lastActivityTick = 0;
+
+static void PowerManager_BlankDisplay(void);
 
 void PowerManager_Init(void) {
   state = POWER_STATE_ACTIVE;
