@@ -38,15 +38,6 @@ uint16_t BinaryClock_GetEditDisplayValue(void) {
   return BinaryClock_GetTimeValue(editClock.hour, editClock.minute);
 }
 
-static uint16_t BinaryClock_GetTimeValue(uint8_t hour, uint8_t minute) {
-  uint8_t hourTens = hour / 10;
-  uint8_t hourOnes = hour % 10;
-  uint8_t minuteTens = minute / 10;
-  uint8_t minuteOnes = minute % 10;
-
-  return (minuteOnes << 12) | (minuteTens << 8) | (hourOnes << 4) | hourTens;
-}
-
 void BinaryClock_BeginEdit(void) {
   RTC_GetTime(&editClock);
 
@@ -70,6 +61,28 @@ DisplayColumnMask BinaryClock_GetSelectedColumn(void) {
   return Editor_GetSelectedColumn(&clockEditor);
 }
 
+DisplayColumnMask BinaryClock_SaveEdit(void) {
+  DisplayColumnMask errors = BinaryClock_ValidateEdit();
+  if (errors != DISPLAY_COLUMN_NONE)
+    return errors;
+
+  editClock.second = 0;
+  if (RTC_SetTime(&editClock) == HAL_OK) {
+    clock = editClock;
+  }
+
+  return DISPLAY_COLUMN_NONE;
+}
+
+static uint16_t BinaryClock_GetTimeValue(uint8_t hour, uint8_t minute) {
+  uint8_t hourTens = hour / 10;
+  uint8_t hourOnes = hour % 10;
+  uint8_t minuteTens = minute / 10;
+  uint8_t minuteOnes = minute % 10;
+
+  return (minuteOnes << 12) | (minuteTens << 8) | (hourOnes << 4) | hourTens;
+}
+
 static void BinaryClock_UpdateEditTime(void) {
   editClock.hour =
       Editor_GetDigit(&clockEditor, 0) * 10 + Editor_GetDigit(&clockEditor, 1);
@@ -83,19 +96,6 @@ static DisplayColumnMask BinaryClock_ValidateEdit(void) {
 
   if (editClock.hour > 23)
     return DISPLAY_COLUMN_2;
-
-  return DISPLAY_COLUMN_NONE;
-}
-
-DisplayColumnMask BinaryClock_SaveEdit(void) {
-  DisplayColumnMask errors = BinaryClock_ValidateEdit();
-  if (errors != DISPLAY_COLUMN_NONE)
-    return errors;
-
-  editClock.second = 0;
-  if (RTC_SetTime(&editClock) == HAL_OK) {
-    clock = editClock;
-  }
 
   return DISPLAY_COLUMN_NONE;
 }

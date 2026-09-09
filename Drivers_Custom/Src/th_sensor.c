@@ -2,11 +2,7 @@
 
 extern I2C_HandleTypeDef hi2c1;
 
-static HAL_StatusTypeDef TH_Sensor_SendCommand(uint8_t *command,
-                                               uint16_t size) {
-  return HAL_I2C_Master_Transmit(&hi2c1, TH_SENSOR_ADDRESS, command, size,
-                                 HAL_MAX_DELAY);
-}
+static HAL_StatusTypeDef TH_Sensor_SendCommand(uint8_t *command, uint16_t size);
 
 HAL_StatusTypeDef TH_Sensor_Init(void) {
   uint8_t command = TH_SENSOR_CMD_SOFT_RESET;
@@ -59,4 +55,10 @@ HAL_StatusTypeDef TH_Sensor_Read(TH_SENSOR_Data *data) {
                       TH_SENSOR_TEMPERATURE_OFFSET;
 
   return HAL_OK;
+}
+
+static HAL_StatusTypeDef TH_Sensor_SendCommand(uint8_t *command,
+                                               uint16_t size) {
+  return HAL_I2C_Master_Transmit(&hi2c1, TH_SENSOR_ADDRESS, command, size,
+                                 HAL_MAX_DELAY);
 }

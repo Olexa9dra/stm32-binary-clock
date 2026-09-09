@@ -19,7 +19,8 @@ static const uint16_t buzzerNotePeriods[BUZZER_NOTE_COUNT] = {
     [BUZZER_NOTE_C3] = BUZZER_NOTE_C3_PERIOD,
 };
 
-void Buzzer_Off(void);
+static void Buzzer_Off(void);
+static void Buzzer_PlayNote(BuzzerNote note);
 
 void Buzzer_Init(void) {
   if (HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1) != HAL_OK) {
@@ -27,19 +28,6 @@ void Buzzer_Init(void) {
   }
 
   Buzzer_Off();
-}
-
-void Buzzer_Off(void) { __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 0); }
-
-void Buzzer_PlayNote(BuzzerNote note) {
-  if (note >= BUZZER_NOTE_COUNT)
-    return;
-
-  uint16_t period = buzzerNotePeriods[note];
-
-  __HAL_TIM_SET_AUTORELOAD(&htim2, period);
-  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, period / 2);
-  __HAL_TIM_SET_COUNTER(&htim2, 0);
 }
 
 void Buzzer_StartAlarm(void) {
@@ -82,4 +70,19 @@ void Buzzer_StopAlarm(void) {
   alarmActive = 0;
   alarmInPause = 0;
   Buzzer_Off();
+}
+
+static void Buzzer_Off(void) {
+  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 0);
+}
+
+static void Buzzer_PlayNote(BuzzerNote note) {
+  if (note >= BUZZER_NOTE_COUNT)
+    return;
+
+  uint16_t period = buzzerNotePeriods[note];
+
+  __HAL_TIM_SET_AUTORELOAD(&htim2, period);
+  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, period / 2);
+  __HAL_TIM_SET_COUNTER(&htim2, 0);
 }

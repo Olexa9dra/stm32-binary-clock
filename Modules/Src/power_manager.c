@@ -6,9 +6,6 @@ static PowerState state = POWER_STATE_ACTIVE;
 
 static uint32_t lastActivityTick = 0;
 
-static void PowerManager_TurnOffModules(void);
-static void PowerManager_TurnOnModules(void);
-
 void PowerManager_Init(void) {
   state = POWER_STATE_ACTIVE;
   lastActivityTick = HAL_GetTick();
@@ -41,7 +38,7 @@ void PowerManager_Sleep(void) {
   if (state == POWER_STATE_SLEEPING)
     return;
 
-  PowerManager_TurnOffModules();
+  PowerManager_BlankDisplay();
 
   state = POWER_STATE_SLEEPING;
 }
@@ -52,27 +49,13 @@ void PowerManager_Wake(void) {
     return;
   }
 
-  PowerManager_TurnOnModules();
-
   state = POWER_STATE_ACTIVE;
   lastActivityTick = HAL_GetTick();
 }
 
-PowerState PowerManager_GetState(void) { return state; }
-
 uint8_t PowerManager_IsSleeping(void) { return state == POWER_STATE_SLEEPING; }
 
-static void PowerManager_TurnOffModules(void) {
-  /*
-   * RTC intentionally keeps running.
-   */
-
+static void PowerManager_BlankDisplay(void) {
   LED_Clear();
   LED_Show();
-}
-
-static void PowerManager_TurnOnModules(void) {
-  /*
-   * Display will be redrawn by App_Run().
-   */
 }

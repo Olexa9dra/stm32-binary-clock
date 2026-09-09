@@ -66,6 +66,56 @@ void Date_BeginEdit(void) {
   Editor_Begin(&dateEditor, digits, dateRestrictions);
 }
 
+void Date_SelectNextField(void) { Editor_SelectNext(&dateEditor); }
+
+void Date_IncrementSelected(void) { Editor_Increment(&dateEditor); }
+
+void Date_DecrementSelected(void) { Editor_Decrement(&dateEditor); }
+
+DisplayColumnMask Date_SaveEdit(void) {
+  Date_UpdateEditDate();
+
+  if (editStage == DATE_EDIT_DAY_MONTH) {
+    DisplayColumnMask errors = Date_ValidateDayMonth();
+
+    if (errors != DISPLAY_COLUMN_NONE)
+      return errors;
+
+    editStage = DATE_EDIT_YEAR;
+
+    uint8_t digits[] = {
+        editDate.year / 1000,
+        (editDate.year / 100) % 10,
+        (editDate.year / 10) % 10,
+        editDate.year % 10,
+    };
+
+    Editor_Begin(&dateEditor, digits, yearRestrictions);
+    Editor_SetSelectedField(&dateEditor, 2);
+
+    return DISPLAY_COLUMN_NONE;
+  }
+
+  if (editDate.month == 2 && editDate.date == 29 &&
+      !IsLeapYear(editDate.year)) {
+    editDate.date = 28;
+  }
+  if (RTC_SetDate(&editDate) != HAL_OK) {
+    return DISPLAY_COLUMN_NONE;
+  }
+
+  RTC_GetDate(&date);
+  editStage = DATE_EDIT_DAY_MONTH;
+
+  return DISPLAY_COLUMN_NONE;
+}
+
+DisplayColumnMask Date_GetSelectedColumn(void) {
+  return Editor_GetSelectedColumn(&dateEditor);
+}
+
+uint8_t Date_IsYearEdit(void) { return editStage == DATE_EDIT_YEAR; }
+
 static void Date_UpdateEditDate(void) {
   if (editStage == DATE_EDIT_DAY_MONTH) {
     editDate.date =
@@ -142,53 +192,3 @@ static DisplayColumnMask Date_ValidateDayMonth(void) {
     return DISPLAY_COLUMN_2;
   return DISPLAY_COLUMN_NONE;
 }
-
-void Date_SelectNextField(void) { Editor_SelectNext(&dateEditor); }
-
-void Date_IncrementSelected(void) { Editor_Increment(&dateEditor); }
-
-void Date_DecrementSelected(void) { Editor_Decrement(&dateEditor); }
-
-DisplayColumnMask Date_SaveEdit(void) {
-  Date_UpdateEditDate();
-
-  if (editStage == DATE_EDIT_DAY_MONTH) {
-    DisplayColumnMask errors = Date_ValidateDayMonth();
-
-    if (errors != DISPLAY_COLUMN_NONE)
-      return errors;
-
-    editStage = DATE_EDIT_YEAR;
-
-    uint8_t digits[] = {
-        editDate.year / 1000,
-        (editDate.year / 100) % 10,
-        (editDate.year / 10) % 10,
-        editDate.year % 10,
-    };
-
-    Editor_Begin(&dateEditor, digits, yearRestrictions);
-    Editor_SetSelectedField(&dateEditor, 2);
-
-    return DISPLAY_COLUMN_NONE;
-  }
-
-  if (editDate.month == 2 && editDate.date == 29 &&
-      !IsLeapYear(editDate.year)) {
-    editDate.date = 28;
-  }
-  if (RTC_SetDate(&editDate) != HAL_OK) {
-    return DISPLAY_COLUMN_NONE;
-  }
-
-  RTC_GetDate(&date);
-  editStage = DATE_EDIT_DAY_MONTH;
-
-  return DISPLAY_COLUMN_NONE;
-}
-
-DisplayColumnMask Date_GetSelectedColumn(void) {
-  return Editor_GetSelectedColumn(&dateEditor);
-}
-
-uint8_t Date_IsYearEdit(void) { return editStage == DATE_EDIT_YEAR; }

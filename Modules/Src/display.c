@@ -15,7 +15,6 @@ static void Display_SetLedColor(DisplayMode mode, uint8_t column, uint8_t led,
                                 uint16_t value);
 static const uint8_t (
     *Display_GetLedMask(DisplayRotation rotation))[DISPLAY_COLUMN_COUNT];
-
 static uint8_t Display_ColumnToIndex(DisplayColumnMask column);
 
 void Display_Init(void) {

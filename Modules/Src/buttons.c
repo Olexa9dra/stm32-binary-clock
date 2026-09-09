@@ -88,7 +88,6 @@ static void Buttons_HandleNormalState(uint16_t button) {
     App_SetDisplayMode(mode);
     break;
   case BUTTON3_PIN:
-    // TODO
     break;
   case BUTTON4_PIN:
     switch (mode) {

@@ -18,8 +18,9 @@ static const EditorDigitRestriction alarmRestrictions[EDITOR_FIELD_COUNT] = {
 };
 
 static uint16_t Alarm_GetTimeValue(uint8_t hour, uint8_t minute);
-static void Alarm_Clear(void);
 static void Alarm_UpdateEditTime(void);
+static DisplayColumnMask Alarm_ValidateEdit(void);
+static void Alarm_Clear(void);
 
 void Alarm_Update(void) {
   if (alarmRinging) {
@@ -77,15 +78,6 @@ uint16_t Alarm_GetEditDisplayValue(void) {
   return Alarm_GetTimeValue(displayHour, editAlarmTime.minute);
 }
 
-static uint16_t Alarm_GetTimeValue(uint8_t hour, uint8_t minute) {
-  uint8_t hourTens = hour / 10;
-  uint8_t hourOnes = hour % 10;
-  uint8_t minuteTens = minute / 10;
-  uint8_t minuteOnes = minute % 10;
-
-  return (minuteOnes << 12) | (minuteTens << 8) | (hourOnes << 4) | hourTens;
-}
-
 void Alarm_BeginEdit(void) {
   editAlarmTime = alarmTime;
 
@@ -104,32 +96,6 @@ void Alarm_SelectNextField(void) { Editor_SelectNext(&alarmEditor); }
 void Alarm_IncrementSelected(void) { Editor_Increment(&alarmEditor); }
 
 void Alarm_DecrementSelected(void) { Editor_Decrement(&alarmEditor); }
-
-static void Alarm_UpdateEditTime(void) {
-  editAlarmTime.hour =
-      Editor_GetDigit(&alarmEditor, 0) * 10 + Editor_GetDigit(&alarmEditor, 1);
-
-  editAlarmTime.minute =
-      Editor_GetDigit(&alarmEditor, 2) * 10 + Editor_GetDigit(&alarmEditor, 3);
-}
-
-static DisplayColumnMask Alarm_ValidateEdit(void) {
-  uint8_t hourTens = editAlarmTime.hour / 10;
-  uint8_t hourOnes = editAlarmTime.hour % 10;
-
-  if (hourTens > 2)
-    return DISPLAY_COLUMN_1;
-  if (hourTens == 2 && hourOnes > 4)
-    return DISPLAY_COLUMN_2;
-  if (hourTens == 2 && hourOnes == 4) {
-    if (editAlarmTime.minute / 10 != 0)
-      return DISPLAY_COLUMN_3;
-    if (editAlarmTime.minute % 10 != 0)
-      return DISPLAY_COLUMN_4;
-  }
-
-  return DISPLAY_COLUMN_NONE;
-}
 
 DisplayColumnMask Alarm_SaveEdit(void) {
   Alarm_UpdateEditTime();
@@ -159,6 +125,47 @@ DisplayColumnMask Alarm_SaveEdit(void) {
 
 void Alarm_Disable(void) { Alarm_Clear(); }
 
+DisplayColumnMask Alarm_GetSelectedColumn(void) {
+  return Editor_GetSelectedColumn(&alarmEditor);
+}
+
+uint8_t Alarm_IsRinging(void) { return alarmRinging; }
+
+static uint16_t Alarm_GetTimeValue(uint8_t hour, uint8_t minute) {
+  uint8_t hourTens = hour / 10;
+  uint8_t hourOnes = hour % 10;
+  uint8_t minuteTens = minute / 10;
+  uint8_t minuteOnes = minute % 10;
+
+  return (minuteOnes << 12) | (minuteTens << 8) | (hourOnes << 4) | hourTens;
+}
+
+static void Alarm_UpdateEditTime(void) {
+  editAlarmTime.hour =
+      Editor_GetDigit(&alarmEditor, 0) * 10 + Editor_GetDigit(&alarmEditor, 1);
+
+  editAlarmTime.minute =
+      Editor_GetDigit(&alarmEditor, 2) * 10 + Editor_GetDigit(&alarmEditor, 3);
+}
+
+static DisplayColumnMask Alarm_ValidateEdit(void) {
+  uint8_t hourTens = editAlarmTime.hour / 10;
+  uint8_t hourOnes = editAlarmTime.hour % 10;
+
+  if (hourTens > 2)
+    return DISPLAY_COLUMN_1;
+  if (hourTens == 2 && hourOnes > 4)
+    return DISPLAY_COLUMN_2;
+  if (hourTens == 2 && hourOnes == 4) {
+    if (editAlarmTime.minute / 10 != 0)
+      return DISPLAY_COLUMN_3;
+    if (editAlarmTime.minute % 10 != 0)
+      return DISPLAY_COLUMN_4;
+  }
+
+  return DISPLAY_COLUMN_NONE;
+}
+
 static void Alarm_Clear(void) {
   alarmTime = (RTC_Time){0};
   editAlarmTime = (RTC_Time){0};
@@ -167,9 +174,3 @@ static void Alarm_Clear(void) {
   lastTriggeredMinute = UINT32_MAX;
   Buzzer_StopAlarm();
 }
-
-DisplayColumnMask Alarm_GetSelectedColumn(void) {
-  return Editor_GetSelectedColumn(&alarmEditor);
-}
-
-uint8_t Alarm_IsRinging(void) { return alarmRinging; }

@@ -15,7 +15,6 @@ void PowerManager_Update(void);
 void PowerManager_ResetIdleTimer(void);
 void PowerManager_Sleep(void);
 void PowerManager_Wake(void);
-PowerState PowerManager_GetState(void);
 uint8_t PowerManager_IsSleeping(void);
 
 #endif

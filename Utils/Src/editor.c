@@ -1,20 +1,9 @@
 #include "editor.h"
 
 static uint8_t Editor_WrapIncrement(uint8_t value,
-                                    EditorDigitRestriction restriction) {
-  if (value >= restriction.max)
-    return restriction.min;
-
-  return value + 1;
-}
-
+                                    EditorDigitRestriction restriction);
 static uint8_t Editor_WrapDecrement(uint8_t value,
-                                    EditorDigitRestriction restriction) {
-  if (value <= restriction.min)
-    return restriction.max;
-
-  return value - 1;
-}
+                                    EditorDigitRestriction restriction);
 
 void Editor_Begin(
     Editor *editor, const uint8_t digits[EDITOR_FIELD_COUNT],
@@ -84,4 +73,20 @@ DisplayColumnMask Editor_GetSelectedColumn(const Editor *editor) {
   default:
     return DISPLAY_COLUMN_NONE;
   }
+}
+
+static uint8_t Editor_WrapIncrement(uint8_t value,
+                                    EditorDigitRestriction restriction) {
+  if (value >= restriction.max)
+    return restriction.min;
+
+  return value + 1;
+}
+
+static uint8_t Editor_WrapDecrement(uint8_t value,
+                                    EditorDigitRestriction restriction) {
+  if (value <= restriction.min)
+    return restriction.max;
+
+  return value - 1;
 }

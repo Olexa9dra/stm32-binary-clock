@@ -6,11 +6,9 @@ static DisplayRotation currentRotation = DISPLAY_ROTATION_0;
 static DisplayRotation pendingRotation = DISPLAY_ROTATION_0;
 static uint32_t rotationStartTime = 0;
 
-HAL_StatusTypeDef Accelerometer_ReadWhoAmI(uint8_t *id) {
-  return HAL_I2C_Mem_Read(&hi2c1, ACCELEROMETER_ADDR,
-                          ACCELEROMETER_REG_WHO_AM_I, I2C_MEMADD_SIZE_8BIT, id,
-                          1, ACCELEROMETER_I2C_TIMEOUT_MS);
-}
+static HAL_StatusTypeDef Accelerometer_ReadWhoAmI(uint8_t *id);
+static HAL_StatusTypeDef Accelerometer_ReadXYZ(int16_t *x, int16_t *y,
+                                               int16_t *z);
 
 HAL_StatusTypeDef Accelerometer_Init(void) {
   uint8_t id;
@@ -22,21 +20,6 @@ HAL_StatusTypeDef Accelerometer_Init(void) {
   return HAL_I2C_Mem_Write(&hi2c1, ACCELEROMETER_ADDR,
                            ACCELEROMETER_REG_CTRL_REG1, I2C_MEMADD_SIZE_8BIT,
                            &active, 1, ACCELEROMETER_I2C_TIMEOUT_MS);
-}
-
-HAL_StatusTypeDef Accelerometer_ReadXYZ(int16_t *x, int16_t *y, int16_t *z) {
-  uint8_t data[6];
-  HAL_StatusTypeDef status = HAL_I2C_Mem_Read(
-      &hi2c1, ACCELEROMETER_ADDR, ACCELEROMETER_REG_OUT_X_MSB,
-      I2C_MEMADD_SIZE_8BIT, data, 6, ACCELEROMETER_I2C_TIMEOUT_MS);
-  if (status != HAL_OK)
-    return status;
-
-  *x = (int16_t)((data[0] << 8) | data[1]) >> 2;
-  *y = (int16_t)((data[2] << 8) | data[3]) >> 2;
-  *z = (int16_t)((data[4] << 8) | data[5]) >> 2;
-
-  return HAL_OK;
 }
 
 DisplayRotation Accelerometer_GetRotation(void) {
@@ -80,14 +63,12 @@ DisplayRotation Accelerometer_GetRotation(void) {
 HAL_StatusTypeDef Accelerometer_EnableTapDetection(void) {
   uint8_t ctrl_reg1 = 0x00;
 
-  // Put device into standby before changing interrupt configuration.
   if (HAL_I2C_Mem_Write(&hi2c1, ACCELEROMETER_ADDR, ACCELEROMETER_REG_CTRL_REG1,
                         I2C_MEMADD_SIZE_8BIT, &ctrl_reg1, 1,
                         ACCELEROMETER_I2C_TIMEOUT_MS) != HAL_OK) {
     return HAL_ERROR;
   }
 
-  // Enable single/double pulse detection on X/Y/Z.
   uint8_t pulse_cfg = 0x3F;
 
   if (HAL_I2C_Mem_Write(&hi2c1, ACCELEROMETER_ADDR, ACCELEROMETER_REG_PULSE_CFG,
@@ -96,7 +77,6 @@ HAL_StatusTypeDef Accelerometer_EnableTapDetection(void) {
     return HAL_ERROR;
   }
 
-  // Threshold.
   uint8_t pulse_ths = 0x20;
 
   if (HAL_I2C_Mem_Write(&hi2c1, ACCELEROMETER_ADDR,
@@ -120,7 +100,6 @@ HAL_StatusTypeDef Accelerometer_EnableTapDetection(void) {
     return HAL_ERROR;
   }
 
-  // Pulse timing.
   uint8_t pulse_tmlt = 0x20;
   uint8_t pulse_ltcy = 0x20;
   uint8_t pulse_wind = 0x40;
@@ -137,7 +116,6 @@ HAL_StatusTypeDef Accelerometer_EnableTapDetection(void) {
                     I2C_MEMADD_SIZE_8BIT, &pulse_wind, 1,
                     ACCELEROMETER_I2C_TIMEOUT_MS);
 
-  // Return to active mode.
   ctrl_reg1 = 0x01;
 
   return HAL_I2C_Mem_Write(&hi2c1, ACCELEROMETER_ADDR,
@@ -155,4 +133,26 @@ uint8_t Accelerometer_TapDetected(void) {
   }
 
   return (pulseSource & 0x40U) != 0 ? 1 : 0;
+}
+
+static HAL_StatusTypeDef Accelerometer_ReadWhoAmI(uint8_t *id) {
+  return HAL_I2C_Mem_Read(&hi2c1, ACCELEROMETER_ADDR,
+                          ACCELEROMETER_REG_WHO_AM_I, I2C_MEMADD_SIZE_8BIT, id,
+                          1, ACCELEROMETER_I2C_TIMEOUT_MS);
+}
+
+static HAL_StatusTypeDef Accelerometer_ReadXYZ(int16_t *x, int16_t *y,
+                                               int16_t *z) {
+  uint8_t data[6];
+  HAL_StatusTypeDef status = HAL_I2C_Mem_Read(
+      &hi2c1, ACCELEROMETER_ADDR, ACCELEROMETER_REG_OUT_X_MSB,
+      I2C_MEMADD_SIZE_8BIT, data, 6, ACCELEROMETER_I2C_TIMEOUT_MS);
+  if (status != HAL_OK)
+    return status;
+
+  *x = (int16_t)((data[0] << 8) | data[1]) >> 2;
+  *y = (int16_t)((data[2] << 8) | data[3]) >> 2;
+  *z = (int16_t)((data[4] << 8) | data[5]) >> 2;
+
+  return HAL_OK;
 }
