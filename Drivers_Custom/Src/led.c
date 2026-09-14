@@ -39,17 +39,18 @@ void LED_Clear(void) {
 void LED_Show(void) {
   uint32_t idx = 0;
 
+  HAL_TIM_PWM_Stop_DMA(&htim1, TIM_CHANNEL_1);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+  __HAL_TIM_SET_COUNTER(&htim1, 0);
+
   for (uint16_t led = 0; led < LED_LED_COUNT; led++) {
     for (uint8_t color = 0; color < 3; color++) {
+
       uint8_t value =
           ((uint16_t)ledData[led][color] * brightness) / LED_BRIGHTNESS_FULL;
 
-      for (int8_t bit = 7; bit >= 0; bit--) {
-        if (value & (1U << bit))
-          pwmData[idx++] = LED_PWM_HIGH;
-        else
-          pwmData[idx++] = LED_PWM_LOW;
-      }
+      for (int8_t bit = 7; bit >= 0; bit--)
+        pwmData[idx++] = (value & (1U << bit)) ? LED_PWM_HIGH : LED_PWM_LOW;
     }
   }
 

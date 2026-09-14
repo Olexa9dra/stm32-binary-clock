@@ -39,9 +39,8 @@ void PowerManager_Sleep(void) {
   if (state == POWER_STATE_SLEEPING)
     return;
 
-  PowerManager_BlankDisplay();
-
   state = POWER_STATE_SLEEPING;
+  PowerManager_BlankDisplay();
 }
 
 void PowerManager_Wake(void) {
@@ -58,5 +57,6 @@ uint8_t PowerManager_IsSleeping(void) { return state == POWER_STATE_SLEEPING; }
 
 static void PowerManager_BlankDisplay(void) {
   LED_Clear();
+  HAL_Delay(1);
   LED_Show();
 }
