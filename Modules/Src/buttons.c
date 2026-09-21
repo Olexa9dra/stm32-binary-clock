@@ -39,7 +39,13 @@ void Buttons_Check(void) {
 
       if (PowerManager_IsSleeping()) {
         PowerManager_Wake();
-        continue;
+        buttons[i].prevState = state;
+        for (uint8_t j = 0; j < BUTTON_COUNT; j++) {
+          if (j != i)
+            buttons[j].prevState =
+                HAL_GPIO_ReadPin(BUTTON_GPIO_PORT, buttons[j].pin);
+        }
+        return;
       }
 
       PowerManager_ResetIdleTimer();
