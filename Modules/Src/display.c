@@ -1,87 +1,143 @@
 #include "display.h"
+#include "accelerometer.h"
+#include "led.h"
 #include "light_sensor.h"
-#include "mma8452q.h"
-#include "ws2812.h"
 
-static DisplayColumn blinkColumn = DISPLAY_COLUMN_NONE;
+static DisplayColumnMask blinkColumn = DISPLAY_COLUMN_NONE;
 static uint8_t blinkVisible = 1;
 static uint32_t lastBlinkTick = 0;
+static DisplayColumnMask errorColumns = DISPLAY_COLUMN_NONE;
+static uint8_t errorBlinkVisible = 1;
+static uint32_t errorBlinkStart = 0;
+static uint32_t lastErrorBlinkTick = 0;
 
-static uint16_t Display_GetBlinkMask(void);
-static void Display_SetLedColor(DisplayMode mode, uint8_t column, uint8_t led);
+static void Display_SetLedColor(DisplayMode mode, uint8_t column, uint8_t led,
+                                uint16_t value);
 static const uint8_t (
     *Display_GetLedMask(DisplayRotation rotation))[DISPLAY_COLUMN_COUNT];
+static uint8_t Display_ColumnToIndex(DisplayColumnMask column);
 
 void Display_Init(void) {
-  WS2812_Init();
-  MMA8452Q_Init();
+  LED_Init();
   LightSensor_Init();
 }
 
 void Display_Show(uint16_t value, DisplayMode mode) {
-  if (HAL_GetTick() - lastBlinkTick >= DISPLAY_BLINK_INTERVAL_MS) {
-    lastBlinkTick = HAL_GetTick();
-    blinkVisible ^= 1;
+  uint32_t now = HAL_GetTick();
+
+  if (errorColumns != DISPLAY_COLUMN_NONE) {
+    if (now - errorBlinkStart >= DISPLAY_ERROR_BLINK_DURATION_MS) {
+      errorColumns = DISPLAY_COLUMN_NONE;
+      errorBlinkVisible = 1;
+    } else if (now - lastErrorBlinkTick >= DISPLAY_BLINK_INTERVAL_MS) {
+      lastErrorBlinkTick = now;
+      errorBlinkVisible ^= 1;
+    }
+
+  } else {
+    if (now - lastBlinkTick >= DISPLAY_BLINK_INTERVAL_MS) {
+      lastBlinkTick = now;
+      blinkVisible ^= 1;
+    }
   }
-  if (!blinkVisible && blinkColumn != DISPLAY_COLUMN_NONE)
-    value &= ~Display_GetBlinkMask();
 
   LightSensor_Update();
-  WS2812_SetBrightness(LightSensor_GetBrightness());
-  WS2812_Clear();
+  LED_SetBrightness(LightSensor_GetBrightness());
+  LED_Clear();
 
   const uint8_t (*mask)[DISPLAY_COLUMN_COUNT] =
-      Display_GetLedMask(MMA8452Q_GetRotation());
+      Display_GetLedMask(Accelerometer_GetRotation());
+  uint8_t selectedColumn = Display_ColumnToIndex(blinkColumn);
 
   for (uint8_t column = 0; column < DISPLAY_COLUMN_COUNT; column++) {
     uint8_t nibble = (value >> (column * 4)) & 0x0F;
+
+    if (errorColumns & (1U << column)) {
+      if (!errorBlinkVisible)
+        continue;
+      for (uint8_t row = 0; row < DISPLAY_ROW_COUNT; row++) {
+        if (nibble & (1U << row)) {
+          uint8_t led = mask[DISPLAY_ROW_COUNT - 1 - row][column];
+          LED_SetPixel(led, COLOR_RED);
+        }
+      }
+      continue;
+    }
+
+    if (errorColumns == DISPLAY_COLUMN_NONE && column == selectedColumn &&
+        !blinkVisible) {
+      continue;
+    }
+
     for (uint8_t row = 0; row < DISPLAY_ROW_COUNT; row++) {
       if (nibble & (1U << row)) {
         uint8_t led = mask[DISPLAY_ROW_COUNT - 1 - row][column];
-        Display_SetLedColor(mode, column, led);
+        Display_SetLedColor(mode, column, led, value);
       }
     }
   }
 
-  WS2812_Show();
+  LED_Show();
 }
 
-void Display_SetBlinkColumn(DisplayColumn column) { blinkColumn = column; }
+void Display_SetBlinkColumn(DisplayColumnMask column) {
+  blinkColumn = column;
+  blinkVisible = 1;
+  lastBlinkTick = HAL_GetTick();
+}
 
-static uint16_t Display_GetBlinkMask(void) {
-  switch (blinkColumn) {
+void Display_StartErrorBlink(DisplayColumnMask columns) {
+  if (columns == DISPLAY_COLUMN_NONE)
+    return;
+
+  uint32_t now = HAL_GetTick();
+  errorColumns = columns;
+  errorBlinkVisible = 1;
+  errorBlinkStart = now;
+  lastErrorBlinkTick = now;
+}
+
+static uint8_t Display_ColumnToIndex(DisplayColumnMask column) {
+  switch (column) {
   case DISPLAY_COLUMN_1:
-    return 0x000F;
+    return 0;
   case DISPLAY_COLUMN_2:
-    return 0x00F0;
+    return 1;
   case DISPLAY_COLUMN_3:
-    return 0x0F00;
+    return 2;
   case DISPLAY_COLUMN_4:
-    return 0xF000;
+    return 3;
   default:
-    return 0xFFFF;
+    return DISPLAY_COLUMN_COUNT;
   }
 }
 
-static void Display_SetLedColor(DisplayMode mode, uint8_t column, uint8_t led) {
+static void Display_SetLedColor(DisplayMode mode, uint8_t column, uint8_t led,
+                                uint16_t value) {
   switch (mode) {
   case DISPLAY_MODE_TIME:
-    WS2812_SetPixel(led, COLOR_YELLOW);
+    LED_SetPixel(led, COLOR_YELLOW);
     break;
   case DISPLAY_MODE_DATE:
-    WS2812_SetPixel(led, COLOR_GREEN);
+    LED_SetPixel(led, COLOR_GREEN);
     break;
   case DISPLAY_MODE_ENVIRONMENT:
     if (column < 2)
-      WS2812_SetPixel(led, COLOR_BLUE);
+      LED_SetPixel(led, COLOR_BLUE);
     else
-      WS2812_SetPixel(led, COLOR_RED);
+      LED_SetPixel(led, COLOR_RED);
     break;
   case DISPLAY_MODE_ALARM:
-    WS2812_SetPixel(led, COLOR_PURPLE);
+    LED_SetPixel(led, COLOR_PURPLE);
+    break;
+  case DISPLAY_MODE_BATTERY:
+    if (value > 15)
+      LED_SetPixel(led, COLOR_GREEN);
+    else
+      LED_SetPixel(led, COLOR_RED);
     break;
   default:
-    WS2812_SetPixel(led, COLOR_YELLOW);
+    LED_SetPixel(led, COLOR_YELLOW);
     break;
   }
 }

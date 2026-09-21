@@ -19,7 +19,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Set the project name
-set(CMAKE_PROJECT_NAME 012BinaryClock)
+set(CMAKE_PROJECT_NAME BinaryClock-F103)
 
 # Enable compile command to ease indexing with e.g. clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
@@ -46,18 +46,23 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     App/Src/app.c
-    Drivers_Custom/Src/aht10.c
+    Drivers_Custom/Src/accelerometer.c
+    Drivers_Custom/Src/battery_driver.c
     Drivers_Custom/Src/buzzer.c
+    Drivers_Custom/Src/led.c
     Drivers_Custom/Src/light_sensor.c
-    Drivers_Custom/Src/mma8452q.c
-    Drivers_Custom/Src/rtc_ds3231.c
-    Drivers_Custom/Src/ws2812.c
+    Drivers_Custom/Src/rtc.c
+    Drivers_Custom/Src/th_sensor.c
     Modules/Src/alarm.c
+    Modules/Src/battery.c
     Modules/Src/binary_clock.c
     Modules/Src/buttons.c
     Modules/Src/date.c
     Modules/Src/display.c
     Modules/Src/environment.c
+    Modules/Src/power_manager.c
+    Utils/Src/adc_utils.c
+    Utils/Src/editor.c
 )
 
 # Add include paths
@@ -66,6 +71,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     App/Inc
     Drivers_Custom/Inc
     Modules/Inc
+    Utils/Inc
 )
 
 # Add project symbols (macros)
